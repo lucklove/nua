@@ -153,7 +153,7 @@ void do_check_failed(F&& f, Args&&... args)
 template <typename... Msgs>
 void do_check_failed(Msgs&&... msgs)
 {
-    std::initializer_list<int>{(std::cout << msgs << std::endl, 0)...};
+    (void)std::initializer_list<int>{(std::cout << msgs << std::endl, 0)...};
 }
 
 #define TEST_CASE(test_name)                                                                    \

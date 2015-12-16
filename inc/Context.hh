@@ -4,6 +4,7 @@
 #include <string>
 #include "ScopeGuard.hh"
 #include "ErrorHandler.hh"
+#include "Selector.hh"
 
 namespace nua
 {
@@ -18,6 +19,9 @@ namespace nua
             lua_ctx_ = luaL_newstate();
             if(lua_ctx_ == nullptr)
                 throw std::runtime_error{"initialize lua context failed"};
+
+            ErrorHandler::set_atpanic(lua_ctx_);
+
             if(should_open_libs)
                 luaL_openlibs(lua_ctx_);
         }
@@ -43,6 +47,11 @@ namespace nua
             int status = luaL_dostring(lua_ctx_, code);
             if(status)
                 ErrorHandler::handle(lua_ctx_, status);
+        }
+
+        Selector operator[](const std::string& name) 
+        {
+            return Selector(lua_ctx_, name);
         }
 
         void load(const std::string& file)
