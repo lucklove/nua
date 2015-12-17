@@ -2,9 +2,10 @@
 #include <stdexcept>
 #include <lua.hpp>
 #include <string>
-#include "ScopeGuard.hh"
+#include "stack.hh"
 #include "ErrorHandler.hh"
 #include "Selector.hh"
+#include "Registry.hh"
 
 namespace nua
 {
@@ -12,6 +13,7 @@ namespace nua
     {
     private:
         lua_State* lua_ctx_;
+        std::unique_ptr<Registry> registry_;
     
     public:
         explicit Context(bool should_open_libs = true)
@@ -22,6 +24,8 @@ namespace nua
 
             ErrorHandler::set_atpanic(lua_ctx_);
 
+            registry_ = std::make_unique<Registry>(lua_ctx_); 
+ 
             if(should_open_libs)
                 luaL_openlibs(lua_ctx_);
         }
@@ -39,10 +43,7 @@ namespace nua
 
         void operator()(const char* code)
         {
-            ScopeGuard reset_stack_on_exit([this, saved_top_index = lua_gettop(lua_ctx_)]
-            {
-                lua_settop(lua_ctx_, saved_top_index);
-            });
+            stack::StackGuard sg{lua_ctx_};
             
             int status = luaL_dostring(lua_ctx_, code);
             if(status)
@@ -51,15 +52,12 @@ namespace nua
 
         Selector operator[](const std::string& name) 
         {
-            return Selector(lua_ctx_, name);
+            return Selector(lua_ctx_, registry_.get(), name);
         }
 
         void load(const std::string& file)
         {
-            ScopeGuard reset_stack_on_exit([this, saved_top_index = lua_gettop(lua_ctx_)]
-            {
-                lua_settop(lua_ctx_, saved_top_index);
-            });
+            stack::StackGuard sg{lua_ctx_};
            
             int status = luaL_loadfile(lua_ctx_, file.c_str()); 
             if(status)

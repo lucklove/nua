@@ -20,7 +20,7 @@ public:
         dismissed_ = dismissed;
     }
 
-    ScopeGuard(ScopeGuard const&) = delete;
+    ScopeGuard(const ScopeGuard&) = delete;
     ScopeGuard& operator=(ScopeGuard const&) = delete;
 
 private:

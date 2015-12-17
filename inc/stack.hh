@@ -3,11 +3,26 @@
 #include "primitives.hh"
 #include "MetatableRegistry.hh"
 #include "types.hh"
+#include "ScopeGuard.hh"
 
 namespace nua
 {
 namespace stack
 {
+    class StackGuard
+    {
+    private:
+        ScopeGuard guard_;
+
+    public:
+        StackGuard(lua_State* l) :
+        guard_{[l, saved_top_index = lua_gettop(l)]
+        {
+            lua_settop(l, saved_top_index);
+        }}
+        {}
+    };
+
     template <typename T>
     typename std::enable_if<
         !is_primitive<typename std::decay<T>::type>::value

@@ -2,7 +2,11 @@
 #include <lua.hpp>
 #include <string>
 #include <vector>
+#include <tuple>
 #include "Ref.hh"
+#include "stack.hh"
+#include "Func.hh"
+#include "Registry.hh"
 
 namespace nua
 {
@@ -11,6 +15,7 @@ namespace nua
     private:
         lua_State* l_;
         std::string name_;
+        Registry* registry_;
         RefPtr key_;
 
         std::vector<RefPtr> functor_arguments_;
@@ -27,6 +32,7 @@ namespace nua
         
         void evaluate_function_call(int num_results)
         {
+
             if(!functor_active_)
                 return;
             functor_active_ = false;
@@ -47,9 +53,29 @@ namespace nua
                 ErrorHandler::handle(l_, status);
         }
 
+        template <typename FuncT>
+        void evaluate_store(FuncT&& push_func)
+        {
+            stack::StackGuard sg{l_};
+            lua_pushglobaltable(l_);
+            key_->push();
+            push_func();
+            lua_settable(l_, -3);
+            lua_pop(l_, 1);
+        }
+
+        template <typename... Args, size_t... Is>
+        static std::tuple<Args...> get_n(lua_State* l, std::index_sequence<Is...>)
+        {
+            std::tuple<Args...> ret;
+            (void)std::initializer_list<int>{(std::get<Is>(ret) = stack::get<Args>(l, int(Is - sizeof...(Is))), 0)...}; 
+            lua_pop(l, int(sizeof...(Is)));
+            return ret;  
+        }
+
     public:
-        Selector(lua_State* l, const std::string& name)
-            : l_{l}, name_{name}, key_{make_ref(l, name)}
+        Selector(lua_State* l, Registry* registry, const std::string& name)
+            : l_{l}, name_{name}, registry_{registry}, key_{make_ref(l, name)}
         {}
 
         Selector(const Selector& other) = default;
@@ -64,20 +90,46 @@ namespace nua
         }
 
         template <typename T>
+        typename std::enable_if<is_primitive<T>::value, void>::type
+        operator=(T v)
+        {
+            evaluate_store([this, v]
+            {
+                stack::push(l_, v);
+            });
+        }
+
+        template <typename Ret, typename... Args>
+        void operator=(std::function<Ret(Args...)> func)
+        {
+            evaluate_store([this, func]
+            {
+                auto func_ptr = registry_->registerFunction(func);
+                lua_pushlightuserdata(l_, (void *)func_ptr);
+                lua_pushcclosure(l_, &BaseFunc::dispatcher, 1);
+            });
+        }        
+
+        void get()
+        {
+            stack::StackGuard sg{l_};
+            evaluate_retrieve(0);
+        }
+
+        template <typename T>
         T get()
         {
-            ScopeGuard reset_stack_on_exit([this, saved_top_index = lua_gettop(l_)]
-            {
-                lua_settop(l_, saved_top_index);
-            });
+            stack::StackGuard sg{l_};
             evaluate_retrieve(1);
             return stack::pop<T>(l_);
         }
-/*
-        template <typename... Args>
-        std::tuple<Args...> get()
+
+        template <typename T1, typename T2, typename... Args>
+        std::tuple<T1, T2, Args...> get()
         {
+            stack::StackGuard sg{l_};
+            evaluate_retrieve(sizeof...(Args) + 2);
+            return get_n<T1, T2, Args...>(l_, std::make_index_sequence<sizeof...(Args) + 2>());
         }
-*/
     };
 }
