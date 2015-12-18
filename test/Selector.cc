@@ -51,17 +51,13 @@ TEST_CASE(store_test)
 {
     nua::Context ctx;
 
-    ctx["test_value"] = 123;
+    ctx["test_func"] = [](int x, int y) { return x + y; };
 
     ctx(R"(
-        print(test_value)
+        function run_test(x, y)
+            return test_func(x, y)
+        end
     )");
 
-    ctx["test_func"] = std::function<std::tuple<int, int>()>([]
-    { 
-        return std::make_tuple(1, 2); 
-    });
-    auto x = ctx["test_func"]().get<int, double>();
-    std::cout << std::get<0>(x) << std::endl;
-    std::cout << std::get<1>(x) << std::endl;
+    TEST_CHECK(ctx["run_test"](3, 4).get<int>() == 7);
 }

@@ -73,6 +73,20 @@ namespace nua
             return ret;  
         }
 
+        template <typename L>
+        struct lambda_traits;
+
+        template <typename Ret, typename Class, typename... Args>
+        struct lambda_traits<Ret(Class::*)(Args...) const>
+        {
+            using stl_function_type = std::function<Ret(Args...)>;
+        };
+
+        template <typename L>
+        struct lambda_traits : lambda_traits<decltype(&L::operator())> 
+        {
+        };
+
     public:
         Selector(lua_State* l, Registry* registry, const std::string& name)
             : l_{l}, name_{name}, registry_{registry}, key_{make_ref(l, name)}
@@ -108,7 +122,19 @@ namespace nua
                 lua_pushlightuserdata(l_, (void *)func_ptr);
                 lua_pushcclosure(l_, &BaseFunc::dispatcher, 1);
             });
-        }        
+        }
+
+        template <typename Ret, typename... Args>
+        void operator=(Ret(*func)(Args...))
+        {
+            operator=(std::function<Ret(Args...)>(func));
+        }
+
+        template <typename L, typename = typename std::enable_if<!is_primitive<L>::value>::type>
+        void operator=(const L& lambda)
+        {
+            operator=(typename lambda_traits<L>::stl_function_type(lambda));
+        }
 
         void get()
         {
