@@ -51,7 +51,7 @@ TEST_CASE(store_test)
 {
     nua::Context ctx;
 
-    ctx["test_func"] = [](int x, int y) { return x + y; };
+    ctx["test_func"] = [](int x, int y) { return std::make_tuple(y, x); };
 
     ctx(R"(
         function run_test(x, y)
@@ -59,5 +59,40 @@ TEST_CASE(store_test)
         end
     )");
 
-    TEST_CHECK(ctx["run_test"](3, 4).get<int>() == 7);
+    int x, y;
+    std::tie(x, y) = ctx["run_test"](3, 4).get<int, int>();
+    TEST_CHECK(x == 4 && y == 3);
+}
+
+TEST_CASE(set_multi_class_with_member)
+{
+    nua::Context ctx;
+    struct S
+    {
+        int vs;
+    };
+
+    struct T
+    {
+        int vt;
+    };
+
+    ctx["S"].setClass<S>("vs", &S::vs);
+    ctx["T"].setClass<T>("vt", &T::vt);
+
+    S s{1};
+    T t{-1};
+
+    ctx(R"(
+        function exchange(s, t)
+            local tmp = s:vs()
+            s:set_vs(t:vt())
+            t:set_vt(tmp)
+            return true
+        end
+    )");
+
+    TEST_REQUIRE(ctx["exchange"](s, t).get<bool>());
+    TEST_CHECK(s.vs == -1);
+    TEST_CHECK(t.vt == 1);
 }

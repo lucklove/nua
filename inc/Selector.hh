@@ -118,9 +118,7 @@ namespace nua
         {
             evaluate_store([this, func]
             {
-                auto func_ptr = registry_->registerFunction(func);
-                lua_pushlightuserdata(l_, (void *)func_ptr);
-                lua_pushcclosure(l_, &BaseFunc::dispatcher, 1);
+                registry_->registerFunction(l_, func);
             });
         }
 
@@ -156,6 +154,16 @@ namespace nua
             stack::StackGuard sg{l_};
             evaluate_retrieve(sizeof...(Args) + 2);
             return get_n<T1, T2, Args...>(l_, std::make_index_sequence<sizeof...(Args) + 2>());
+        }
+
+        template <typename T, typename... Funcs>
+        typename std::enable_if<!is_primitive<T>::value, void>::type
+        setClass(Funcs... funcs)
+        {
+            evaluate_store([this, funcs...]
+            {
+                registry_->registerClass<T>(l_, name_, funcs...);   
+            });
         }
     };
 }

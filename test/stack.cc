@@ -52,8 +52,11 @@ TEST_CASE(push_get_userdata)
     struct Y { int y; } b{2};
     struct Z { int z; } c{3};
     nua::MetatableRegistry::push_new_metatable<X>(l, "X");
+    lua_pop(l, 1);
     nua::MetatableRegistry::push_new_metatable<Y>(l, "Y");
+    lua_pop(l, 1);
     nua::MetatableRegistry::push_new_metatable<Z>(l, "Z");
+    lua_pop(l, 1);
     nua::stack::push(l, a);
     nua::stack::push(l, b);
     nua::stack::push(l, c);
@@ -79,14 +82,16 @@ TEST_CASE(push_pop)
 
     struct X { int x; } a{1};
     nua::MetatableRegistry::push_new_metatable<X>(l, "X");
+    lua_pop(l, 1);
 
     nua::stack::push(l, 1);
     nua::stack::push(l, a);
     nua::stack::push(l, true);
     nua::stack::push(l, nullptr);
     
+    /** clang bug, will fail with clang */
     TEST_CHECK(nua::stack::pop<std::nullptr_t>(l) == nullptr);
-    TEST_CHECK(nua::stack::pop<bool>(l) == true);
+    TEST_CHECK(nua::stack::pop<bool>(l) == true);   
     auto x = nua::stack::pop<X>(l);
     TEST_CHECK(x.x == 1);
     TEST_CHECK(nua::stack::pop<int>(l) == 1);

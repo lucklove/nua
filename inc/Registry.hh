@@ -3,6 +3,7 @@
 #include <memory>
 #include "MetatableRegistry.hh"
 #include "Func.hh"
+#include "Class.hh"
 
 namespace nua
 {
@@ -11,7 +12,8 @@ namespace nua
     private:
         lua_State* ctx_;
         std::vector<std::unique_ptr<BaseFunc>> funcs_;
-
+        std::vector<std::unique_ptr<BaseClass>> classes_;
+        
     public:
         Registry(lua_State* ctx) : ctx_(ctx) 
         {
@@ -19,10 +21,15 @@ namespace nua
         }
 
         template <typename Ret, typename... Args>
-        BaseFunc* registerFunction(std::function<Ret(Args...)> func)
+        void registerFunction(lua_State* l, std::function<Ret(Args...)> func)
         {
-            funcs_.push_back(std::make_unique<Func<Ret, Args...>>(func));
-            return funcs_.back().get();
+            funcs_.push_back(std::make_unique<Func<Ret, Args...>>(l, func));
+        }
+
+        template <typename T, typename... Args, typename... Funcs>
+        void registerClass(lua_State*l, const std::string& name, Funcs... funcs)
+        {
+            classes_.push_back(std::make_unique<Class<T, Funcs...>>(l, name, funcs...));
         }
     };
 }
