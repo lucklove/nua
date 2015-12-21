@@ -20,7 +20,6 @@ namespace detail
     template <typename Ret, typename... Args, size_t... Is>
     void apply_n(lua_State* l, std::function<Ret(Args...)> func, std::index_sequence<Is...>)
     {
-        static_assert(is_primitive<Ret>::value, "not support return userdata temporarily");
         Ret ret = func(stack::get<Args>(l, int(Is - sizeof...(Is)))...);
         lua_pop(l, int(sizeof...(Is)));
         stack::push(l, ret);

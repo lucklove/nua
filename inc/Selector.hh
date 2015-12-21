@@ -171,18 +171,18 @@ namespace nua
             return get_n<T1, T2, Args...>(l_, std::make_index_sequence<sizeof...(Args) + 2>());
         }
 
-        template <typename T, typename... Funcs>
+        template <typename T, typename... Args, typename... Funcs>
         typename std::enable_if<!is_primitive<T>::value, void>::type
         setClass(Funcs... funcs)
         {
             evaluate_store([this, funcs...]
             {
-                registry_->registerClass<T>(l_, name_, funcs...);   
+                registry_->registerClass<T, Args...>(l_, name_, funcs...);   
             });
 
             evaluate_store([this, funcs...]
             {
-                registry_->registerClass<std::reference_wrapper<T>>(l_, name_ + "_ref", funcs...);   
+                registry_->registerClass<std::reference_wrapper<T>, Args...>(l_, name_ + "_ref", funcs...);   
             });
         }
     };

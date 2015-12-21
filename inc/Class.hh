@@ -25,13 +25,11 @@ namespace nua
 
         void register_ctor(lua_State* l)
         {
-            std::cout << "注册ctor" << std::endl;
             ctor_.reset(new A(l, metatable_name_.c_str()));
         }
 
         void register_dtor(lua_State* l)
         {
-            std::cout << "注册dtor" << std::endl;
             dtor_.reset(new Dtor<R>(l, metatable_name_.c_str()));
         }
 
@@ -67,15 +65,23 @@ namespace nua
         }
 
         template <typename Ret, typename... Args>
-        void register_member(lua_State* l, const std::string& name, Ret(R::*fun)(Args...))
+        void register_member(lua_State* l, const std::string& name, Ret(R::*func)(Args...))
         {
-std::cout << "Ret(T::*fun)(Args...)" << std::endl;
+            std::function<Ret(R*, Args...)> lambda = [func](R *t, Args... args) -> Ret 
+            {
+                return (t->*func)(std::forward<Args>(args)...);      
+            };
+            funcs_.push_back(std::make_unique<ClassFunc<T, Ret, Args...>>(l, name, metatable_name_, lambda));   
         }
 
         template <typename Ret, typename... Args>
-        void register_member(lua_State* l, const std::string& name, Ret(R::*fun)(Args...) const)
+        void register_member(lua_State* l, const std::string& name, Ret(R::*func)(Args...) const)
         {
-std::cout << "Ret(T::*fun)(Args...) const" << std::endl;
+            std::function<Ret(const R*, Args...)> lambda = [func](const R* t, Args... args)
+            {
+                return (t->*func)(std::forward<Args>(args)...);      
+            };
+            funcs_.push_back(std::make_unique<ClassFunc<T, Ret, Args...>>(l, name, metatable_name_, lambda));   
         }
         
         void register_members(lua_State* l)

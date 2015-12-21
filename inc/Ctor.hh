@@ -26,6 +26,7 @@ namespace nua
 
         int apply(lua_State* l)
         {
+std::cout << "new" << std::endl;
             detail::apply_n(l, func_, std::make_index_sequence<sizeof...(Args) + 1>());
             return 1;
         }

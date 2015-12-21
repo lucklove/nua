@@ -1,5 +1,6 @@
 SET(TEST_SOURCES
 	test.cc
+#    member_function.cc
     constructor.cc
 #    stack.cc
 #    MetatableRegistry.cc
