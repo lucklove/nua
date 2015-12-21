@@ -51,15 +51,15 @@ TEST_CASE(push_get_userdata)
     struct X { int x; } a{1};
     struct Y { int y; } b{2};
     struct Z { int z; } c{3};
-    nua::MetatableRegistry::push_new_metatable<X>(l, "X");
+    nua::MetatableRegistry::push_new_metatable<std::reference_wrapper<X>>(l, "X");
     lua_pop(l, 1);
-    nua::MetatableRegistry::push_new_metatable<Y>(l, "Y");
+    nua::MetatableRegistry::push_new_metatable<std::reference_wrapper<Y>>(l, "Y");
     lua_pop(l, 1);
-    nua::MetatableRegistry::push_new_metatable<Z>(l, "Z");
+    nua::MetatableRegistry::push_new_metatable<std::reference_wrapper<Z>>(l, "Z");
     lua_pop(l, 1);
-    nua::stack::push(l, a);
-    nua::stack::push(l, b);
-    nua::stack::push(l, c);
+    nua::stack::push(l, std::ref(a));
+    nua::stack::push(l, std::ref(b));
+    nua::stack::push(l, std::ref(c));
 
     X& ar = nua::stack::get<X&>(l, 1);
     Y& br = nua::stack::get<Y&>(l, 2);
@@ -81,11 +81,11 @@ TEST_CASE(push_pop)
     nua::MetatableRegistry::create(l);
 
     struct X { int x; } a{1};
-    nua::MetatableRegistry::push_new_metatable<X>(l, "X");
+    nua::MetatableRegistry::push_new_metatable<std::reference_wrapper<X>>(l, "X");
     lua_pop(l, 1);
 
     nua::stack::push(l, 1);
-    nua::stack::push(l, a);
+    nua::stack::push(l, std::ref(a));
     nua::stack::push(l, true);
     nua::stack::push(l, nullptr);
     

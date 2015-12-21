@@ -4,6 +4,8 @@
 #include "BaseFunc.hh"
 #include "Func.hh"
 #include "ClassFunc.hh"
+#include "Ctor.hh"
+#include "Dtor.hh"
 
 namespace nua
 {
@@ -12,35 +14,39 @@ namespace nua
         virtual ~BaseClass() = default;
     };
 
-    template <typename T, typename... Members>
+    template <typename T, typename R, typename A, typename... Members>
     class Class : public BaseClass
     {
     private:
         std::vector<std::unique_ptr<BaseFunc>> funcs_;
         std::string metatable_name_;
+        std::unique_ptr<A> ctor_;
+        std::unique_ptr<Dtor<R>> dtor_;
 
         void register_ctor(lua_State* l)
         {
-            /** TODO: to be implemented */
+            std::cout << "注册ctor" << std::endl;
+            ctor_.reset(new A(l, metatable_name_.c_str()));
         }
 
         void register_dtor(lua_State* l)
         {
-            /** TODO: to be implemented */
+            std::cout << "注册dtor" << std::endl;
+            dtor_.reset(new Dtor<R>(l, metatable_name_.c_str()));
         }
 
         /** member */
         template <typename M>
-        void register_member(lua_State* l, const std::string& name, M T::*member)
+        void register_member(lua_State* l, const std::string& name, M R::*member)
         {
             register_member(l, name, member, typename std::is_const<M>::type{});
         }
 
         /** const member */
         template <typename M>
-        void register_member(lua_State* l, const std::string& name, M T::*member, std::true_type)
+        void register_member(lua_State* l, const std::string& name, M R::*member, std::true_type)
         {
-            std::function<M(T*)> lambda_get = [member](T *t) 
+            std::function<M(R*)> lambda_get = [member](R *t) 
             {
                 return t->*member;
             };
@@ -49,11 +55,11 @@ namespace nua
 
         /** non-const member */
         template <typename M>
-        void register_member(lua_State* l, const std::string& name, M T::*member, std::false_type)
+        void register_member(lua_State* l, const std::string& name, M R::*member, std::false_type)
         {
             register_member(l, name, member, std::true_type{});
 
-            std::function<void(T*, M)> lambda_set  = [member](T *t, M v) 
+            std::function<void(R*, M)> lambda_set  = [member](R *t, M v) 
             {
                 t->*member = v;
             };
@@ -61,13 +67,13 @@ namespace nua
         }
 
         template <typename Ret, typename... Args>
-        void register_member(lua_State* l, const std::string& name, Ret(T::*fun)(Args...))
+        void register_member(lua_State* l, const std::string& name, Ret(R::*fun)(Args...))
         {
 std::cout << "Ret(T::*fun)(Args...)" << std::endl;
         }
 
         template <typename Ret, typename... Args>
-        void register_member(lua_State* l, const std::string& name, Ret(T::*fun)(Args...) const)
+        void register_member(lua_State* l, const std::string& name, Ret(R::*fun)(Args...) const)
         {
 std::cout << "Ret(T::*fun)(Args...) const" << std::endl;
         }
@@ -83,13 +89,18 @@ std::cout << "Ret(T::*fun)(Args...) const" << std::endl;
             register_members(l, members...);                              
         }
 
+        Class() = default;
+
     public:
         Class(lua_State* l, const std::string& name, Members... members)
         {
             metatable_name_ = name + "_lib";
             MetatableRegistry::push_new_metatable<T>(l, metatable_name_);
-            register_ctor(l);
-            register_dtor(l);
+            if(std::is_same<T, R>::value)
+            {
+                register_ctor(l);
+                register_dtor(l);
+            }
             register_members(l, members...);
             lua_pushvalue(l, -1);
             lua_setfield(l, -1, "__index");

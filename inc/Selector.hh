@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
-#include "Ref.hh"
+#include "LuaRef.hh"
 #include "stack.hh"
 #include "Func.hh"
 #include "Registry.hh"
@@ -16,9 +16,9 @@ namespace nua
         lua_State* l_;
         std::string name_;
         Registry* registry_;
-        RefPtr key_;
+        LuaRefPtr key_;
 
-        std::vector<RefPtr> functor_arguments_;
+        std::vector<LuaRefPtr> functor_arguments_;
         bool functor_active_ = false;
 
         void evaluate_retrieve(int num_results)
@@ -43,7 +43,7 @@ namespace nua
             lua_copy(l_, handler_index, func_index);
             lua_replace(l_, handler_index);
             
-            for(const RefPtr& arg : functor_arguments_)
+            for(const LuaRefPtr& arg : functor_arguments_)
                 arg->push();
 
             int status = lua_pcall(l_, functor_arguments_.size(), num_results, handler_index - 1);
@@ -83,28 +83,43 @@ namespace nua
         };
 
         template <typename L>
-        struct lambda_traits : lambda_traits<decltype(&L::operator())> 
+        struct lambda_traits : lambda_traits<decltype(&L::operator())>
         {
+        };
+
+        template <typename T>
+        struct is_lambda
+        {
+        private:
+            template <typename L>
+            static auto check(...) -> std::false_type;
+
+            template <typename L>
+            static auto check(int) -> decltype(std::declval<decltype(&L::operator())>(), std::true_type());
+
+        public:
+            using type = decltype(check<T>(0));
+            enum { value = decltype(check<T>(0))::value };
         };
 
     public:
         Selector(lua_State* l, Registry* registry, const std::string& name)
-            : l_{l}, name_{name}, registry_{registry}, key_{make_ref(l, name)}
+            : l_{l}, name_{name}, registry_{registry}, key_{make_lua_ref(l, name)}
         {}
 
         Selector(const Selector& other) = default;
 
         template <typename... Args>
-        Selector operator()(Args&&... args)
+        Selector operator()(Args... args)
         {
             Selector copy{*this};
-            copy.functor_arguments_ = make_refs(l_, std::forward<Args>(args)...);
+            copy.functor_arguments_ = make_lua_refs(l_, args...);
             copy.functor_active_ = true;
             return copy;
         }
 
         template <typename T>
-        typename std::enable_if<is_primitive<T>::value, void>::type
+        typename std::enable_if<!is_lambda<T>::value, void>::type
         operator=(T v)
         {
             evaluate_store([this, v]
@@ -128,7 +143,7 @@ namespace nua
             operator=(std::function<Ret(Args...)>(func));
         }
 
-        template <typename L, typename = typename std::enable_if<!is_primitive<L>::value>::type>
+        template <typename L, typename = typename std::enable_if<is_lambda<L>::value>::type>
         void operator=(const L& lambda)
         {
             operator=(typename lambda_traits<L>::stl_function_type(lambda));
@@ -163,6 +178,11 @@ namespace nua
             evaluate_store([this, funcs...]
             {
                 registry_->registerClass<T>(l_, name_, funcs...);   
+            });
+
+            evaluate_store([this, funcs...]
+            {
+                registry_->registerClass<std::reference_wrapper<T>>(l_, name_ + "_ref", funcs...);   
             });
         }
     };

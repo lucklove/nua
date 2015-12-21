@@ -5,30 +5,30 @@
 
 namespace nua
 {
-    class Ref
+    class LuaRef
     {
     private:
         lua_State* l_;
         int ref_;
     
     public:
-        Ref(lua_State* ctx, int ref)
+        LuaRef(lua_State* ctx, int ref)
             : l_{ctx}, ref_{ref}
         {}
     
-        Ref(lua_State* ctx)
-            : Ref(ctx, LUA_REFNIL)
+        LuaRef(lua_State* ctx)
+            : LuaRef(ctx, LUA_REFNIL)
         {}
 
-        Ref(const Ref&) = delete;
+        LuaRef(const LuaRef&) = delete;
 
-        Ref(Ref&& other) : l_{other.l_}, ref_{other.ref_}
+        LuaRef(LuaRef&& other) : l_{other.l_}, ref_{other.ref_}
         {
             other.l_ = nullptr;
             other.ref_ = 0;
         }
        
-        ~Ref()
+        ~LuaRef()
         {
             if(l_)
                 luaL_unref(l_, LUA_REGISTRYINDEX, ref_);
@@ -40,19 +40,19 @@ namespace nua
         }
     };
 
-    using RefPtr = std::shared_ptr<Ref>;
+    using LuaRefPtr = std::shared_ptr<LuaRef>;
 
     template <typename T>
-    RefPtr make_ref(lua_State* ctx, T&& t)
+    LuaRefPtr make_lua_ref(lua_State* ctx, T t)
     {
-        stack::push(ctx, std::forward<T>(t));
-        return std::make_shared<Ref>(ctx, luaL_ref(ctx, LUA_REGISTRYINDEX));
+        stack::push(ctx, t);
+        return std::make_shared<LuaRef>(ctx, luaL_ref(ctx, LUA_REGISTRYINDEX));
     }
 
 
     template <typename... Args>
-    std::vector<RefPtr> make_refs(lua_State* ctx, Args&&... args)
+    std::vector<LuaRefPtr> make_lua_refs(lua_State* ctx, Args&&... args)
     {
-        return {make_ref(ctx, args)...};       
+        return {make_lua_ref(ctx, args)...};       
     }
 }

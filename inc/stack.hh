@@ -24,16 +24,19 @@ namespace stack
     };
 
     template <typename T>
-    typename std::enable_if<
-        !is_primitive<typename std::decay<T>::type>::value
-        && !std::is_const<typename std::remove_reference<T>::type>::value,
-    void>::type 
-    push(lua_State* l, T& t)
+    void push(lua_State* l, const T& t)
     {
-        using value_t = typename std::decay<T>::type;
-        value_t** ptr = (value_t **)lua_newuserdata(l, sizeof(value_t *));
-        nua::MetatableRegistry::set_metatable<value_t>(l);
-        *ptr = &t;    
+        T* ptr = (T*)lua_newuserdata(l, sizeof(T));
+        MetatableRegistry::set_metatable<T>(l);
+        new(ptr) T{t};
+    }
+
+    template <typename T>
+    void push(lua_State* l, std::reference_wrapper<T> t)
+    {
+        T** ptr = (T **)lua_newuserdata(l, sizeof(T *));
+        MetatableRegistry::set_metatable<std::reference_wrapper<T>>(l);
+        *ptr = &t.get();    
     }
 
     inline void push(lua_State* l, bool v)
@@ -77,6 +80,32 @@ namespace stack
     typename std::enable_if<!std::is_rvalue_reference<T>::value, T>::type
     get(lua_State* l, int index)
     {
+        using value_t = typename std::decay<T>::type;
+        static_assert(!is_primitive<value_t>::value, "not implemented primitive for get");
+        if(std::is_lvalue_reference<T>::value && !check::is_type<std::reference_wrapper<value_t>>(l, index))
+            goto fail;
+
+        if(check::is_type<std::reference_wrapper<value_t>>(l, index))
+        {
+            value_t** ptr = (value_t**)lua_touserdata(l, index);
+            if(ptr == nullptr) goto fail;
+            return **ptr;   
+        }
+        else if(check::is_type<value_t>(l, index))
+        {
+            value_t* ptr = (value_t*)lua_touserdata(l, index);
+            if(ptr == nullptr) goto fail;
+            return *ptr;   
+        }
+fail:
+        std::cout << "can not get user type at index " << index << std::endl;
+        throw std::bad_cast{};
+    }
+/*
+    template <typename T>
+    typename std::enable_if<!std::is_rvalue_reference<T>::value, T>::type
+    get(lua_State* l, int index)
+    {
         static_assert(!is_primitive<typename std::decay<T>::type>::value, "not implemented primitive for get");
         if(!check::is_type<T>(l, index))
         {
@@ -93,7 +122,7 @@ namespace stack
         }
         return **ptr;
     }
-
+*/
     template <>
     inline bool get<bool>(lua_State* l, int index)
     {
@@ -151,12 +180,14 @@ namespace stack
     }
 
     template <typename T>
-    typename std::enable_if<!std::is_reference<T>::value, T>::type
-    pop(lua_State* l)
+    T pop(lua_State* l)
     {
-        T ret = get<T>(l, -1);
-        lua_pop(l, 1);
-        return ret;
+        ScopeGuard pop_on_exit([l]
+        {
+            lua_pop(l, 1);
+        });
+
+        return get<T>(l, -1);
     } 
 }       /**< stack */
 }       /**< nua */

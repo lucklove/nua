@@ -1,9 +1,11 @@
 SET(TEST_SOURCES
 	test.cc
-    stack.cc
-    MetatableRegistry.cc
-    primitives.cc
-    Selector.cc
+    constructor.cc
+#    stack.cc
+#    MetatableRegistry.cc
+#    primitives.cc
+#    Selector.cc
+#    call.cc
 )
 
 INCLUDE_DIRECTORIES(../inc)
