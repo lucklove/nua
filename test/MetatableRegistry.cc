@@ -7,7 +7,7 @@ TEST_CASE(get_typename)
 {
     lua_State* l = luaL_newstate();
     TEST_REQUIRE(l);
-    ScopeGuard on_exit([&l]{ lua_close(l); });
+    nua::ScopeGuard on_exit([&l]{ lua_close(l); });
     nua::MetatableRegistry::create(l);
     struct T {} t;
     nua::MetatableRegistry::push_new_metatable<T>(l, "T");

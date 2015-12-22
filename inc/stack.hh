@@ -24,7 +24,8 @@ namespace stack
     };
 
     template <typename T>
-    void push(lua_State* l, const T& t)
+    typename std::enable_if<std::is_copy_constructible<T>::value, void>::type 
+    push(lua_State* l, const T& t)
     {
         T* ptr = (T*)lua_newuserdata(l, sizeof(T));
         MetatableRegistry::set_metatable<T>(l);
@@ -83,46 +84,29 @@ namespace stack
         using value_t = typename std::decay<T>::type;
         static_assert(!is_primitive<value_t>::value, "not implemented primitive for get");
         if(std::is_lvalue_reference<T>::value && !check::is_type<std::reference_wrapper<value_t>>(l, index))
-            goto fail;
-
-        if(check::is_type<std::reference_wrapper<value_t>>(l, index))
         {
-            value_t** ptr = (value_t**)lua_touserdata(l, index);
-            if(ptr == nullptr) goto fail;
-            return **ptr;   
+std::cout << MetatableRegistry::get_typename(l, index) << std::endl;
+            std::cout << "can not get reference of type " << typeid(value_t).name() << ", type mismatch" << std::endl;
+            throw std::bad_cast{};
         }
-        else if(check::is_type<value_t>(l, index))
+
+        if(check::is_type<value_t>(l, index))
         {
             value_t* ptr = (value_t*)lua_touserdata(l, index);
-            if(ptr == nullptr) goto fail;
+            if(ptr == nullptr) throw std::runtime_error{"get userdata failed"};
             return *ptr;   
         }
-fail:
-        std::cout << "can not get user type at index " << index << std::endl;
-        throw std::bad_cast{};
-    }
-/*
-    template <typename T>
-    typename std::enable_if<!std::is_rvalue_reference<T>::value, T>::type
-    get(lua_State* l, int index)
-    {
-        static_assert(!is_primitive<typename std::decay<T>::type>::value, "not implemented primitive for get");
-        if(!check::is_type<T>(l, index))
+        else if(check::is_type<std::reference_wrapper<value_t>>(l, index))
         {
-            std::cout << "can not get user type at index " << index << std::endl;
-            throw std::bad_cast{};
+            value_t** ptr = (value_t**)lua_touserdata(l, index);
+            if(ptr == nullptr) throw std::runtime_error{"get userdata failed"};
+            return **ptr;   
         }
 
-        using value_t = typename std::decay<T>::type;
-        value_t** ptr = (value_t**)lua_touserdata(l, index);
-        if(ptr == nullptr)
-        {
-            std::cout << "can not get user type at index " << index << std::endl;
-            throw std::bad_cast{};
-        }
-        return **ptr;
+        std::cout << "can not get user type " << typeid(value_t).name() << ", type mismatch" << std::endl;
+        throw std::bad_cast{};
     }
-*/
+
     template <>
     inline bool get<bool>(lua_State* l, int index)
     {
@@ -142,6 +126,7 @@ fail:
             std::cout << "can not get integer at index " << index << std::endl;
             throw std::bad_cast{};
         }
+
         return lua_tointeger(l, index);
     }
 

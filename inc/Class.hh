@@ -4,7 +4,6 @@
 #include "BaseFunc.hh"
 #include "Func.hh"
 #include "ClassFunc.hh"
-#include "Ctor.hh"
 #include "Dtor.hh"
 
 namespace nua
@@ -14,19 +13,13 @@ namespace nua
         virtual ~BaseClass() = default;
     };
 
-    template <typename T, typename R, typename A, typename... Members>
+    template <typename T, typename R, typename... Members>
     class Class : public BaseClass
     {
     private:
         std::vector<std::unique_ptr<BaseFunc>> funcs_;
         std::string metatable_name_;
-        std::unique_ptr<A> ctor_;
         std::unique_ptr<Dtor<R>> dtor_;
-
-        void register_ctor(lua_State* l)
-        {
-            ctor_.reset(new A(l, metatable_name_.c_str()));
-        }
 
         void register_dtor(lua_State* l)
         {
@@ -98,15 +91,12 @@ namespace nua
         Class() = default;
 
     public:
-        Class(lua_State* l, const std::string& name, Members... members)
+        Class(lua_State* l, Members... members) : metatable_name_{typeid(T).name()}
         {
-            metatable_name_ = name + "_lib";
+            metatable_name_ += "_lib";
             MetatableRegistry::push_new_metatable<T>(l, metatable_name_);
             if(std::is_same<T, R>::value)
-            {
-                register_ctor(l);
                 register_dtor(l);
-            }
             register_members(l, members...);
             lua_pushvalue(l, -1);
             lua_setfield(l, -1, "__index");

@@ -116,7 +116,7 @@ namespace nua
                 
                 lua_pop(ctx, 2);
             }
-            
+
             if(name.empty()) 
                 name = lua_typename(ctx, lua_type(ctx, index));
 

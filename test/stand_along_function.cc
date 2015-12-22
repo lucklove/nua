@@ -51,15 +51,66 @@ TEST_CASE(lua_call_cpp)
 {
     nua::Context ctx;
 
-    ctx["test_func"] = [](int x, int y) { return std::make_tuple(y, x); };
+    ctx["make_tuple"] = [](int x, int y) { return std::make_tuple(y, x); };
 
     ctx(R"(
-        function run_test(x, y)
-            return test_func(x, y)
+        function apply(x, y)
+            return make_tuple(x, y)
         end
     )");
 
     int x, y;
-    std::tie(x, y) = ctx["run_test"](3, 4).get<int, int>();
+    std::tie(x, y) = ctx["apply"](3, 4).get<int, int>();
     TEST_CHECK(x == 4 && y == 3);
+}
+
+TEST_CASE(return_reference)
+{
+    nua::Context ctx;
+
+    struct T
+    {
+        int v;
+    } t{47};
+
+    ctx.setClass<T>();
+
+    ctx["return_ref"] = [&t]() -> T& { return t; };
+    
+    ctx(R"(
+        function apply()
+            return return_ref()
+        end
+    )");
+
+    T& r = ctx["apply"]().get<T&>();
+    TEST_CHECK(&r == &t);
+    TEST_CHECK(r.v == t.v);
+}
+
+TEST_CASE(multi_return)
+{
+    nua::Context ctx;
+    struct T
+    {
+        int v;
+        T(const T&) = delete;
+    } t{47};
+
+    ctx.setClass<T>();
+
+    ctx["multi_return"] = [&t]() -> std::tuple<T&, std::string>
+    {
+        return std::tuple<T&, std::string>(t, "nua");
+    };
+
+    ctx(R"(
+        function apply()
+            return multi_return()
+        end
+    )");
+    auto tup = ctx["apply"]().get<T&, std::string>();
+    TEST_CHECK(std::get<0>(tup).v == t.v); 
+    TEST_CHECK(std::get<1>(tup) == "nua"); 
+    TEST_CHECK(&std::get<0>(tup) == &t); 
 }

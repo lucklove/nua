@@ -14,8 +14,8 @@ TEST_CASE(set_multi_class_with_member)
         int vt;
     };
 
-    ctx["S"].setClass<S>("vs", &S::vs);
-    ctx["T"].setClass<T>("vt", &T::vt);
+    ctx.setClass<S>("vs", &S::vs);
+    ctx.setClass<T>("vt", &T::vt);
 
     S s{1};
     T t{-1};

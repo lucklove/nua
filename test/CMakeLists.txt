@@ -1,12 +1,12 @@
 SET(TEST_SOURCES
 	test.cc
-#    member_function.cc
-    constructor.cc
-#    stack.cc
-#    MetatableRegistry.cc
-#    primitives.cc
-#    Selector.cc
-#    call.cc
+    stand_along_function.cc
+    member_function.cc
+    leak.cc
+    stack.cc
+    MetatableRegistry.cc
+    primitives.cc
+    set_class.cc
 )
 
 INCLUDE_DIRECTORIES(../inc)

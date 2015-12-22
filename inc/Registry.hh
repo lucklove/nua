@@ -38,11 +38,11 @@ namespace nua
             funcs_.push_back(std::make_unique<Func<Ret, Args...>>(l, func));
         }
 
-        template <typename T, typename... Args, typename... Funcs>
-        void registerClass(lua_State*l, const std::string& name, Funcs... funcs)
+        template <typename T, typename... Funcs>
+        void registerClass(lua_State*l, Funcs... funcs)
         {
             using R =  typename reference_traits<T>::type;
-            classes_.push_back(std::make_unique<Class<T, R, Ctor<R, Args...>, Funcs...>>(l, name, funcs...));
+            classes_.push_back(std::make_unique<Class<T, R, Funcs...>>(l, funcs...));
         }
     };
 }

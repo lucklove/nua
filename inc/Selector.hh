@@ -67,10 +67,11 @@ namespace nua
         template <typename... Args, size_t... Is>
         static std::tuple<Args...> get_n(lua_State* l, std::index_sequence<Is...>)
         {
-            std::tuple<Args...> ret;
-            (void)std::initializer_list<int>{(std::get<Is>(ret) = stack::get<Args>(l, int(Is - sizeof...(Is))), 0)...}; 
-            lua_pop(l, int(sizeof...(Is)));
-            return ret;  
+            ScopeGuard sg([l]{ lua_pop(l, int(sizeof...(Is))); });
+            return std::tuple<Args...>(stack::get<Args>(l, int(Is - sizeof...(Is)))...);
+//            std::tuple<Args...> ret;
+//            (void)std::initializer_list<int>{(std::get<Is>(ret) = stack::get<Args>(l, int(Is - sizeof...(Is))), 0)...}; 
+//            return ret;  
         }
 
         template <typename L>
@@ -169,21 +170,6 @@ namespace nua
             stack::StackGuard sg{l_};
             evaluate_retrieve(sizeof...(Args) + 2);
             return get_n<T1, T2, Args...>(l_, std::make_index_sequence<sizeof...(Args) + 2>());
-        }
-
-        template <typename T, typename... Args, typename... Funcs>
-        typename std::enable_if<!is_primitive<T>::value, void>::type
-        setClass(Funcs... funcs)
-        {
-            evaluate_store([this, funcs...]
-            {
-                registry_->registerClass<T, Args...>(l_, name_, funcs...);   
-            });
-
-            evaluate_store([this, funcs...]
-            {
-                registry_->registerClass<std::reference_wrapper<T>, Args...>(l_, name_ + "_ref", funcs...);   
-            });
         }
     };
 }

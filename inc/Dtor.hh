@@ -20,7 +20,6 @@ namespace nua
 
         int apply(lua_State* l)
         {
-std::cout << "gc" << std::endl;
             T *t = (T *)luaL_checkudata(l, 1, metatable_name_.c_str());
             t->~T();
             return 0;

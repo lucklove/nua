@@ -14,7 +14,7 @@ namespace nua
     private:
         lua_State* lua_ctx_;
         std::unique_ptr<Registry> registry_;
-    
+
     public:
         explicit Context(bool should_open_libs = true)
         {
@@ -74,6 +74,14 @@ namespace nua
         void forceGC()
         {
             lua_gc(lua_ctx_, LUA_GCCOLLECT, 0);
+        }
+
+        template <typename T, typename... Funcs>
+        typename std::enable_if<!is_primitive<T>::value, void>::type
+        setClass(Funcs... funcs)
+        {
+            registry_->registerClass<T>(lua_ctx_, funcs...);   
+            registry_->registerClass<std::reference_wrapper<T>>(lua_ctx_, funcs...);   
         }
     };
 }

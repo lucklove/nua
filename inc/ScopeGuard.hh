@@ -1,29 +1,32 @@
 #pragma once
 
-class ScopeGuard
+namespace nua
 {
-public:
-    explicit ScopeGuard(std::function<void()> on_exit)
-        : on_exit_(on_exit), dismissed_(false)
-    {}
-
-    ~ScopeGuard()
+    class ScopeGuard
     {
-        if (!dismissed_)
+    public:
+        explicit ScopeGuard(std::function<void()> on_exit)
+            : on_exit_(on_exit), dismissed_(false)
+        {}
+
+        ~ScopeGuard()
         {
-            on_exit_();
+            if(!dismissed_)
+            {
+                on_exit_();
+            }
         }
-    }
 
-    void dismiss(bool dismissed=true)
-    {
-        dismissed_ = dismissed;
-    }
+        void dismiss(bool dismissed=true)
+        {
+            dismissed_ = dismissed;
+        }
 
-    ScopeGuard(const ScopeGuard&) = delete;
-    ScopeGuard& operator=(ScopeGuard const&) = delete;
+        ScopeGuard(const ScopeGuard&) = delete;
+        ScopeGuard& operator=(ScopeGuard const&) = delete;
 
-private:
-    std::function<void()> on_exit_;
-    bool dismissed_;
-};
+    private:
+        std::function<void()> on_exit_;
+        bool dismissed_;
+    };
+}

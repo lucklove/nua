@@ -17,12 +17,31 @@ namespace detail
         return first;
     }
 
+    template <typename T>
+    constexpr T forward_ref(T t, std::false_type)
+    {
+        return t;
+    }
+
+    template <typename T>
+    constexpr std::reference_wrapper<typename std::decay<T>::type> forward_ref(T t, std::true_type)
+    {
+        return std::reference_wrapper<typename std::decay<T>::type>(t);
+    }
+
     template <typename Ret, typename... Args, size_t... Is>
     void apply_n(lua_State* l, std::function<Ret(Args...)> func, std::index_sequence<Is...>)
     {
         Ret ret = func(stack::get<Args>(l, int(Is - sizeof...(Is)))...);
         lua_pop(l, int(sizeof...(Is)));
-        stack::push(l, ret);
+        if(std::is_lvalue_reference<Ret>::value)
+        {
+            stack::push(l, std::ref(ret));
+        }
+        else
+        {
+            stack::push(l, ret);
+        }
     }
 
     template <typename... Args, size_t... Is>
@@ -38,10 +57,12 @@ namespace detail
         std::index_sequence<RetIs...>, 
         std::index_sequence<ArgIs...>)
     {
-        static_assert(is_all_true(is_primitive<Rets>::value...), "not support return userdata temporarily");
+//        static_assert(is_all_true(is_primitive<Rets>::value...), "not support return userdata temporarily");
         std::tuple<Rets...> ret = func(stack::get<Args>(l, int(ArgIs - sizeof...(ArgIs)))...);
         lua_pop(l, int(sizeof...(ArgIs)));
-        (void)std::initializer_list<int>{(stack::push(l, std::get<RetIs>(ret)), 0)...}; 
+        (void)std::initializer_list<int>{(
+            stack::push(l, forward_ref<Rets>(std::get<RetIs>(ret), typename std::is_lvalue_reference<Rets>::type{})), 
+        0)...}; 
     }
 }
 
