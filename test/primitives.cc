@@ -1,5 +1,5 @@
 #include "UnitTest.hh"
-#include "primitives.hh"
+#include "nua/primitives.hh"
 
 TEST_CASE(primitives)
 {

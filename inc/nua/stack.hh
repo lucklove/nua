@@ -1,5 +1,6 @@
 #pragma once
 #include <lua.hpp>
+#include <iostream>
 #include "primitives.hh"
 #include "MetatableRegistry.hh"
 #include "types.hh"
@@ -35,6 +36,7 @@ namespace stack
     template <typename T>
     void push(lua_State* l, std::reference_wrapper<T> t)
     {
+        static_assert(!std::is_const<T>::value, "not support const reference, use value instead");
         T** ptr = (T **)lua_newuserdata(l, sizeof(T *));
         MetatableRegistry::set_metatable<std::reference_wrapper<T>>(l);
         *ptr = &t.get();    

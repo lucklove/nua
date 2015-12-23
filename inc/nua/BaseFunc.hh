@@ -5,18 +5,6 @@ namespace nua
 {
 namespace detail
 {
-    template <typename... Boolean>
-    constexpr bool is_all_true(bool first, Boolean... left)
-    {
-        return first && is_all_true(left...);
-    }
-
-    template <>
-    constexpr bool is_all_true<>(bool first)
-    {
-        return first;
-    }
-
     template <typename T>
     constexpr T forward_ref(T t, std::false_type)
     {
@@ -57,7 +45,6 @@ namespace detail
         std::index_sequence<RetIs...>, 
         std::index_sequence<ArgIs...>)
     {
-//        static_assert(is_all_true(is_primitive<Rets>::value...), "not support return userdata temporarily");
         std::tuple<Rets...> ret = func(stack::get<Args>(l, int(ArgIs - sizeof...(ArgIs)))...);
         lua_pop(l, int(sizeof...(ArgIs)));
         (void)std::initializer_list<int>{(

@@ -1,8 +1,7 @@
 #include "UnitTest.hh"
-#include "MetatableRegistry.hh"
-#include "ScopeGuard.hh"
+#include "nua/MetatableRegistry.hh"
+#include "nua/ScopeGuard.hh"
 
-#include "types.hh"
 TEST_CASE(get_typename)
 {
     lua_State* l = luaL_newstate();

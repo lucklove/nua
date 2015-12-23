@@ -132,7 +132,6 @@ static void report_and_exit()
 
 int main()
 {
-/*
     signal(SIGSEGV, [](int)
     {
         UnitTest::getInstance().failure();
@@ -140,7 +139,6 @@ int main()
         UnitTest::getInstance().printLastCheckedPoint();
         report_and_exit();
     });
-*/
     UnitTest::getInstance().runAll();    
     report_and_exit();    
 }

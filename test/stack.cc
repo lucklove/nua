@@ -1,6 +1,6 @@
 #include "UnitTest.hh"
-#include "ScopeGuard.hh"
-#include "stack.hh"
+#include "nua/ScopeGuard.hh"
+#include "nua/stack.hh"
 
 TEST_CASE(get_bool)
 {
