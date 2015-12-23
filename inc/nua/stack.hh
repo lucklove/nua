@@ -87,7 +87,6 @@ namespace stack
         static_assert(!is_primitive<value_t>::value, "not implemented primitive for get");
         if(std::is_lvalue_reference<T>::value && !check::is_type<std::reference_wrapper<value_t>>(l, index))
         {
-std::cout << MetatableRegistry::get_typename(l, index) << std::endl;
             std::cout << "can not get reference of type " << typeid(value_t).name() << ", type mismatch" << std::endl;
             throw std::bad_cast{};
         }

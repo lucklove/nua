@@ -94,3 +94,40 @@ TEST_CASE(recursive_user_type)
     ctx["apply"](std::ref(r));
     TEST_REQUIRE(r.t.member == 47);
 }
+
+TEST_CASE(virtual_class)
+{
+    nua::Context ctx;
+    static bool b_applyed = false;
+    static bool t_applyed = false;
+    struct B
+    {
+        virtual void apply()
+        {
+            b_applyed = true;
+        }
+        virtual ~B() = default;
+    };
+
+    struct T : B
+    {
+        void apply() override
+        {
+            t_applyed = true;
+        }
+    } t;
+
+    ctx.setClass<B>("apply", &B::apply);
+    ctx.setClass<T>("apply", &T::apply);
+    ctx(R"(
+        function apply(b)
+            b:apply()
+        end
+    )");
+    B& rt = t;
+    TEST_REQUIRE(!b_applyed && !t_applyed);
+    ctx["apply"](rt);
+    TEST_CHECK(b_applyed && !t_applyed);
+    ctx["apply"](std::ref(rt));
+    TEST_CHECK(b_applyed && t_applyed);
+}

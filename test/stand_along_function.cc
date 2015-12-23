@@ -70,6 +70,9 @@ TEST_CASE(return_reference)
 
     struct T
     {
+T() = default;
+T(int v) : v{v} {}
+        T(const T&) = delete;
         int v;
     } t{47};
 
@@ -94,7 +97,6 @@ TEST_CASE(multi_return)
     struct T
     {
         int v;
-        T(const T&) = delete;
     } t{47};
 
     ctx.setClass<T>();

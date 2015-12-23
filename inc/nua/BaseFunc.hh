@@ -17,19 +17,24 @@ namespace detail
         return std::reference_wrapper<typename std::decay<T>::type>(t);
     }
 
+    template <typename T>
+    void apply_push(lua_State* l, T& t, std::true_type)
+    {
+        stack::push(l, std::ref(t));
+    }
+
+    template <typename T>
+    void apply_push(lua_State* l, const T& t, std::false_type)
+    {
+        stack::push(l, t);
+    }
+
     template <typename Ret, typename... Args, size_t... Is>
     void apply_n(lua_State* l, std::function<Ret(Args...)> func, std::index_sequence<Is...>)
     {
         Ret ret = func(stack::get<Args>(l, int(Is - sizeof...(Is)))...);
         lua_pop(l, int(sizeof...(Is)));
-        if(std::is_lvalue_reference<Ret>::value)
-        {
-            stack::push(l, std::ref(ret));
-        }
-        else
-        {
-            stack::push(l, ret);
-        }
+        apply_push(l, ret, typename std::is_lvalue_reference<Ret>::type{});
     }
 
     template <typename... Args, size_t... Is>
