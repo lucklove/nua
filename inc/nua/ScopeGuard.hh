@@ -10,7 +10,7 @@ namespace nua
             : on_exit_(on_exit), dismissed_(false)
         {}
 
-        ~ScopeGuard()
+        ~ScopeGuard() noexcept(false)
         {
             if(!dismissed_)
             {
