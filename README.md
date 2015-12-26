@@ -2,7 +2,7 @@
 
 Simple C++11 friendly header-only bindings to Lua  
 
-A component of PM-Game-Server.   
+A component of [PM-Game-Server](https://github.com/lucklove/PM-Game-Server).   
 Reference to [Selene](https://github.com/jeremyong/Selene) and fix some features to meet the PM-Game-Server's demand   
 
 ---
@@ -19,7 +19,7 @@ Reference to [Selene](https://github.com/jeremyong/Selene) and fix some features
 ```c++
 nua::Context ctx;
 ```
-如果在创建时不需要打开lua标准库:  
+如果不需要打开lua标准库:  
 ```c++
 nua::Context ctx{false};
 ```  
@@ -132,4 +132,45 @@ ctx(R"(
     end
 )");
 ctx["apply"](std::cref(rt));
+```
+
+##注意  
+- 基本类型的对象的*引用*不能传递给nua, 也不能在传递给nua的函数中作为参数或返回值, 也不能从lua返回, 
+基本类型包括所有的数字类型, std::string, std::nullptr_t 
+```c++
+ctx(R"(
+    function foo(x)
+    end
+)");
+int x = 0;
+ctx["foo"](x);             /**< 合法 */
+ctx["foo"](std::ref(x));   /**< 非法 */
+ctx["foo"](std::cref(x));  /**< 非法 */
+```
+
+另外, 注意到std::string也是基本类型, 所以一下函数是代码是非法的:  
+```c++
+ctx["foo"] = [](const std::string& s) {...};    /**< 非法, 试图接收基础类型的引用 */
+ctx["foo"] = []() -> std::string& {...};        /**< 非法, 试图返回基础类型的引用 */
+```
+
+- 在传入nua时是reference的对象才可以以reference的形式返回C++, 切必须保证const修饰正确  
+```c++
+struct T
+{
+};
+
+ctx.setClass<T>();
+ctx(R"(
+    function forward_ref(x)
+        return x
+    end
+)");  
+
+T t;
+ctx["forward_ref"](t).get<const T&>();                  /**< 非法, runtime error */
+ctx["forward_ref"](t).get<T&>();                        /**< 非法, runtime error */
+ctx["forward_ref"](std::ref(t)).get<const T&>();        /**< 合法 */
+ctx["forward_ref"](std::cref(t)).get<const T&>();       /**< 合法 */
+ctx["forward_ref"](std::cref(t)).get<T&>();             /**< 非法, 不能从const reference转到reference */
 ```
