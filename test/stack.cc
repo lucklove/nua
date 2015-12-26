@@ -99,6 +99,22 @@ TEST_CASE(push_pop)
     TEST_CHECK(nua::stack::pop<int>(l) == 1);
 }
 
+TEST_CASE(implicit_numeric_convert)
+{
+    lua_State* l = luaL_newstate();
+    TEST_REQUIRE(l);
+    nua::ScopeGuard on_exit([&l]{ lua_close(l); });
+
+    nua::stack::push(l, 1);
+    TEST_CHECK(nua::stack::pop<bool>(l) == true);
+    
+    nua::stack::push(l, false); 
+    TEST_CHECK(nua::stack::pop<float>(l) == 0);
+
+    nua::stack::push(l, 47.3); 
+    TEST_CHECK(nua::stack::pop<int>(l) == 47);
+}
+
 TEST_CASE(should_throw_bad_cast)
 {
     lua_State* l = luaL_newstate();

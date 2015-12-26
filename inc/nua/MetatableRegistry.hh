@@ -56,7 +56,10 @@ namespace nua
         {
             std::string name = get_typename<T>(ctx);
             if(name == "unregistered type")
+            {
+                std::cout << typeid(T).name() << ": unregistered" << std::endl;
                 throw std::logic_error{"try to use a unregistered type"};
+            }
             
             luaL_setmetatable(ctx, name.c_str());
         }

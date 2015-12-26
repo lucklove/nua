@@ -101,17 +101,17 @@ TEST_CASE(multi_return)
 
     ctx.setClass<T>();
 
-    ctx["multi_return"] = [&t]() -> std::tuple<T&, std::string>
+    ctx["multi_return"] = [](T& t) -> std::tuple<T&, std::string>
     {
         return std::tuple<T&, std::string>(t, "nua");
     };
 
     ctx(R"(
-        function apply()
-            return multi_return()
+        function apply(t)
+            return multi_return(t)
         end
     )");
-    auto tup = ctx["apply"]().get<T&, std::string>();
+    auto tup = ctx["apply"](std::ref(t)).get<T&, std::string>();
     TEST_CHECK(std::get<0>(tup).v == t.v); 
     TEST_CHECK(std::get<1>(tup) == "nua"); 
     TEST_CHECK(&std::get<0>(tup) == &t); 

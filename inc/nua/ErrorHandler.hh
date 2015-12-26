@@ -25,7 +25,6 @@ namespace nua
             lua_pushvalue(l, -3);
             lua_pushinteger(l, 2);
             lua_call(l, 2, 1);
-
             return 1;
         }   
 

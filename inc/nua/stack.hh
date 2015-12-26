@@ -80,11 +80,11 @@ namespace stack
     }
 
     template <typename T>
-    typename std::enable_if<!std::is_rvalue_reference<T>::value, T>::type
+    typename std::enable_if<!is_primitive<T>::value, T>::type
     get(lua_State* l, int index)
     {
         using value_t = typename std::decay<T>::type;
-        static_assert(!is_primitive<value_t>::value, "not implemented primitive for get");
+        static_assert(!std::is_rvalue_reference<T>::value, "not support rvalue reference");
         if(std::is_lvalue_reference<T>::value && !check::is_type<std::reference_wrapper<value_t>>(l, index))
         {
             std::cout << "can not get reference of type " << typeid(value_t).name() << ", type mismatch" << std::endl;
@@ -108,38 +108,27 @@ namespace stack
         throw std::bad_cast{};
     }
 
-    template <>
-    inline bool get<bool>(lua_State* l, int index)
+    template <typename T>
+    typename std::enable_if<is_primitive<T>::value, T>::type
+    get(lua_State* l, int index)
     {
-        if(!lua_isboolean(l, index))
+        if(lua_isboolean(l, index))
         {
-            std::cout << "can not get boolean at index " << index << std::endl;
+            return lua_toboolean(l, index);
+        }
+        else if(lua_isinteger(l, index))
+        {
+            return lua_tointeger(l, index);
+        }
+        else if(lua_isnumber(l, index))
+        {
+            return lua_tonumber(l, index);
+        }
+        else
+        {
+            std::cout << "can not get numeric type at index " << index << std::endl;
             throw std::bad_cast{};
         }
-        return lua_toboolean(l, index);
-    }
-
-    template <>
-    inline int get<int>(lua_State* l, int index)
-    {
-        if(!lua_isinteger(l, index))
-        {
-            std::cout << "can not get integer at index " << index << std::endl;
-            throw std::bad_cast{};
-        }
-
-        return lua_tointeger(l, index);
-    }
-
-    template <>
-    inline lua_Number get<lua_Number>(lua_State* l, int index)
-    {
-        if(!lua_isnumber(l, index))
-        {
-            std::cout << "can not get number at index " << index << std::endl;
-            throw std::bad_cast{};
-        }
-        return lua_tonumber(l, index);
     }
 
     template <>
