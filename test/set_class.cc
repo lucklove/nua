@@ -95,7 +95,7 @@ TEST_CASE(recursive_user_type)
     TEST_REQUIRE(r.t.member == 47);
 }
 
-TEST_CASE(virtual_class)
+TEST_CASE(polymiorphism)
 {
     nua::Context ctx;
     static bool b_applyed = false;
