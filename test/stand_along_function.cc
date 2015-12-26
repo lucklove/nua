@@ -70,15 +70,17 @@ TEST_CASE(return_reference)
 
     struct T
     {
-T() = default;
-T(int v) : v{v} {}
+        T() = default;
+        T(int v) : v{v} {}
         T(const T&) = delete;
         int v;
-    } t{47};
+    };
+
+    const T t{47};
 
     ctx.setClass<T>();
 
-    ctx["return_ref"] = [&t]() -> T& { return t; };
+    ctx["return_ref"] = [&t]() -> const T& { return t; };
     
     ctx(R"(
         function apply()
@@ -86,7 +88,7 @@ T(int v) : v{v} {}
         end
     )");
 
-    T& r = ctx["apply"]().get<T&>();
+    const T& r = ctx["apply"]().get<const T&>();
     TEST_CHECK(&r == &t);
     TEST_CHECK(r.v == t.v);
 }

@@ -131,3 +131,26 @@ TEST_CASE(virtual_class)
     ctx["apply"](std::ref(rt));
     TEST_CHECK(b_applyed && t_applyed);
 }
+
+TEST_CASE(const_reference)
+{
+    nua::Context ctx;
+    struct T
+    {
+        int v;
+        T(const T&) = delete;
+        T(int v) : v{v} {}
+    } t{47};
+    const T& ct = t;
+    ctx.setClass<T>();
+    ctx(R"(
+        function apply(t)
+            return t
+        end
+    )");
+    const T& r = ctx["apply"](std::ref(t)).get<const T&>();
+    const T& cr = ctx["apply"](std::ref(ct)).get<const T&>();
+    TEST_CHECK(r.v == 47);
+    TEST_CHECK(&r == &ct);
+    TEST_CHECK(&cr == &ct);
+}

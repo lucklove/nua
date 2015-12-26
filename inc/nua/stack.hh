@@ -36,7 +36,6 @@ namespace stack
     template <typename T>
     void push(lua_State* l, std::reference_wrapper<T> t)
     {
-        static_assert(!std::is_const<T>::value, "not support const reference, use value instead");
         T** ptr = (T **)lua_newuserdata(l, sizeof(T *));
         MetatableRegistry::set_metatable<std::reference_wrapper<T>>(l);
         *ptr = &t.get();    
@@ -83,9 +82,11 @@ namespace stack
     typename std::enable_if<!is_primitive<T>::value, T>::type
     get(lua_State* l, int index)
     {
-        using value_t = typename std::decay<T>::type;
         static_assert(!std::is_rvalue_reference<T>::value, "not support rvalue reference");
-        if(std::is_lvalue_reference<T>::value && !check::is_type<std::reference_wrapper<value_t>>(l, index))
+        using value_t = typename std::remove_reference<T>::type;
+        if(std::is_lvalue_reference<T>::value 
+            && !(check::is_type<std::reference_wrapper<value_t>>(l, index) 
+                || check::is_type<std::reference_wrapper<typename std::remove_cv<value_t>::type>>(l, index)))
         {
             std::cout << "can not get reference of type " << typeid(value_t).name() << ", type mismatch" << std::endl;
             throw std::bad_cast{};
@@ -97,7 +98,8 @@ namespace stack
             if(ptr == nullptr) throw std::runtime_error{"get userdata failed"};
             return *ptr;   
         }
-        else if(check::is_type<std::reference_wrapper<value_t>>(l, index))
+        else if(check::is_type<std::reference_wrapper<value_t>>(l, index)
+            || check::is_type<std::reference_wrapper<typename std::remove_cv<value_t>::type>>(l, index))
         {
             value_t** ptr = (value_t**)lua_touserdata(l, index);
             if(ptr == nullptr) throw std::runtime_error{"get userdata failed"};

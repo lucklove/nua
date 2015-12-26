@@ -82,6 +82,7 @@ namespace nua
         {
             registry_->registerClass<T>(lua_ctx_, funcs...);   
             registry_->registerClass<std::reference_wrapper<T>>(lua_ctx_, funcs...);   
+            registry_->registerClass<std::reference_wrapper<const T>>(lua_ctx_, funcs...);   
         }
     };
 }
