@@ -2,13 +2,14 @@
 #include <lua.hpp>
 #include <stdexcept>
 #include <string>
+#include "ExceptionHolder.hh"
 
 namespace nua
 {
     struct ErrorHandler
     {
     private:
-        static int error_handler(lua_State* l)
+        static int error_handler(lua_State* l) noexcept
         {
             /** trace back */
             const char* msg = "<not set>";
@@ -28,25 +29,12 @@ namespace nua
             return 1;
         }   
 
-        [[noreturn]]
-        static int atpanic(lua_State* l)
-        {
-            const char *reason = "<unknown panic reason>";
-            if(!lua_isnil(l, -1))
-            {
-                reason = lua_tostring(l, -1);
-                if(reason == nullptr)
-                    reason = "<unknown panic raason>";
-            }
-           
-            lua_pop(l, lua_gettop(l));
-            throw std::runtime_error{reason};
-        }
-
     public:
         [[noreturn]]
         static void handle(lua_State* l, int status_code)
         {
+            ExceptionHolder::check();
+
             if(lua_isstring(l, -1))
             {
                 throw std::runtime_error{lua_tostring(l, -1)};
@@ -64,11 +52,6 @@ namespace nua
         {
             lua_pushcfunction(l, error_handler);
             return lua_gettop(l);
-        }
-
-        static lua_CFunction set_atpanic(lua_State* l)
-        {
-            return lua_atpanic(l, atpanic);
         }
     };
 }

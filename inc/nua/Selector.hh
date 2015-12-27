@@ -32,7 +32,6 @@ namespace nua
         
         void evaluate_function_call(int num_results)
         {
-
             if(!functor_active_)
                 return;
             functor_active_ = false;

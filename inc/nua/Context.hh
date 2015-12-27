@@ -22,8 +22,6 @@ namespace nua
             if(lua_ctx_ == nullptr)
                 throw std::runtime_error{"initialize lua context failed"};
 
-            ErrorHandler::set_atpanic(lua_ctx_);
-
             registry_ = std::make_unique<Registry>(lua_ctx_); 
  
             if(should_open_libs)
@@ -61,10 +59,7 @@ namespace nua
            
             int status = luaL_loadfile(lua_ctx_, file.c_str()); 
             if(status)
-            {
-                ErrorHandler::handle(lua_ctx_, status);
-                return;
-            }
+                ErrorHandler::handle(lua_ctx_, status);     /**< handle is noreturn */
 
             status = lua_pcall(lua_ctx_, 0, LUA_MULTRET, 0);
             if(status)
