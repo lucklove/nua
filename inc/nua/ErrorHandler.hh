@@ -9,9 +9,8 @@ namespace nua
     struct ErrorHandler
     {
     private:
-        static int error_handler(lua_State* l) noexcept
+        static int traceback(lua_State* l) noexcept
         {
-            /** trace back */
             const char* msg = "<not set>";
             if(!lua_isnil(l, -1))
             {
@@ -28,6 +27,21 @@ namespace nua
             lua_call(l, 2, 1);
             return 1;
         }   
+
+        [[noreturn]]
+        static int atpanic(lua_State* l)
+        {
+            const char *reason = "<unknown panic reason>";
+            if(!lua_isnil(l, -1))
+            {
+                reason = lua_tostring(l, -1);
+                if(reason == nullptr)
+                    reason = "<unknown panic raason>";
+            }
+    
+            lua_pop(l, lua_gettop(l));
+            throw std::runtime_error{reason};
+        }
 
     public:
         [[noreturn]]
@@ -50,8 +64,13 @@ namespace nua
 
         static int set_error_handler(lua_State* l)
         {
-            lua_pushcfunction(l, error_handler);
+            lua_pushcfunction(l, traceback);
             return lua_gettop(l);
+        }
+
+        static lua_CFunction set_atpanic(lua_State* l)
+        {
+            return lua_atpanic(l, atpanic);
         }
     };
 }

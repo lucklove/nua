@@ -5,6 +5,7 @@
 #include "MetatableRegistry.hh"
 #include "types.hh"
 #include "ScopeGuard.hh"
+#include "ErrorHandler.hh"
 
 namespace nua
 {
@@ -87,10 +88,7 @@ namespace stack
         if(std::is_lvalue_reference<T>::value 
             && !(check::is_type<std::reference_wrapper<value_t>>(l, index) 
                 || check::is_type<std::reference_wrapper<typename std::remove_cv<value_t>::type>>(l, index)))
-        {
-            std::cout << "can not get reference of type " << typeid(value_t).name() << ", type mismatch" << std::endl;
-            throw std::bad_cast{};
-        }
+            goto fail;
 
         if(check::is_type<value_t>(l, index))
         {
@@ -106,8 +104,11 @@ namespace stack
             return **ptr;   
         }
 
-        std::cout << "can not get user type " << typeid(value_t).name() << ", type mismatch" << std::endl;
-        throw std::bad_cast{};
+fail:
+        std::string metatable_name = MetatableRegistry::get_typename<T>(l);
+        ErrorHandler::set_atpanic(l);
+        luaL_checkudata(l, index, metatable_name.c_str());
+        throw "should not reach here";
     }
 
     template <typename T>
@@ -122,26 +123,16 @@ namespace stack
         {
             return lua_tointeger(l, index);
         }
-        else if(lua_isnumber(l, index))
-        {
-            return lua_tonumber(l, index);
-        }
-        else
-        {
-            std::cout << "can not get numeric type at index " << index << std::endl;
-            throw std::bad_cast{};
-        }
+
+        ErrorHandler::set_atpanic(l);
+        return luaL_checknumber(l, index);
     }
 
     template <>
     inline std::string get<std::string>(lua_State* l, int index)
     {
-        if(!lua_isstring(l, index))
-        {
-            std::cout << "can not get string at index " << index << std::endl;
-            throw std::bad_cast{};
-        }
-        return lua_tostring(l, index);
+        ErrorHandler::set_atpanic(l);
+        return luaL_checkstring(l, index);
     }
 
     template <>
@@ -149,8 +140,9 @@ namespace stack
     {
         if(!lua_isnil(l, index))
         {
-            std::cout << "can not get nil at index " << index << std::endl;
-            throw std::bad_cast{};
+            ErrorHandler::set_atpanic(l);
+            luaL_checktype(l, index, LUA_TNIL);
+            throw "should not reach here";
         }
 
         return nullptr;

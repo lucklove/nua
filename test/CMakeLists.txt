@@ -7,6 +7,7 @@ SET(TEST_SOURCES
     MetatableRegistry.cc
     primitives.cc
     set_class.cc
+    type_error.cc
 )
 
 INCLUDE_DIRECTORIES(../inc)

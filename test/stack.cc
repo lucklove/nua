@@ -128,7 +128,7 @@ TEST_CASE(should_throw_bad_cast)
         std::cout << "there should be an exception, just ignore it:" << std::endl;
         TEST_CHECK(nua::stack::get<int>(l, -1) && false, "you should not see this");
     }
-    catch(std::bad_cast&)
+    catch(std::runtime_error&)
     {
         flag = true;
     }
