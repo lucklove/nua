@@ -1,7 +1,6 @@
 #pragma once
 #include <lua.hpp>
 #include <memory>
-#include "stack.hh"
 
 namespace nua
 {
@@ -41,18 +40,4 @@ namespace nua
     };
 
     using LuaRefPtr = std::shared_ptr<LuaRef>;
-
-    template <typename T>
-    LuaRefPtr make_lua_ref(lua_State* ctx, T t)
-    {
-        stack::push(ctx, t);
-        return std::make_shared<LuaRef>(ctx, luaL_ref(ctx, LUA_REGISTRYINDEX));
-    }
-
-
-    template <typename... Args>
-    std::vector<LuaRefPtr> make_lua_refs(lua_State* ctx, Args&&... args)
-    {
-        return {make_lua_ref(ctx, args)...};       
-    }
 }

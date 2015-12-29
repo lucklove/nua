@@ -27,7 +27,7 @@ namespace detail
     template <typename T>
     void apply_push(lua_State* l, const T& t, std::false_type)
     {
-        stack::push(l, t);
+       stack::push(l, t);
     }
 
     template <typename Ret, typename... Args, size_t... Is>

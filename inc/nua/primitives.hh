@@ -1,6 +1,7 @@
 #pragma once
 #include <lua.hpp>
 #include <type_traits>
+#include "function.hh"
 
 namespace nua
 {
@@ -18,6 +19,12 @@ namespace nua
 
     template <>
     struct is_primitive<std::nullptr_t>
+    {
+        enum { value = true };
+    };
+
+    template <typename T>
+    struct is_primitive<nua::function<T>>
     {
         enum { value = true };
     };

@@ -101,6 +101,30 @@ ctx["bar"](std::cref(t));       /**< 当传递const ref时不会生成相应的s
 ctx["foo"] = [&]() -> const T& { return t; };
 ```
 
+###C++接收lua函数  
+```lua
+-- test.lua
+
+function add(a, b)
+    return a + b 
+end
+
+function pass_add(x, y)
+    return take_fun_arg(add, x, y)
+end
+```
+
+```c++
+nua::Context ctx;
+ctx["take_fun_arg"] = [](nua::function<int(int, int)> func, int a, int b)
+{
+    return func(a, b); 
+};
+
+ctx.load("test.lua");
+assert(ctx["pass_add"](3, 5) == 8);
+```
+
 ###lua中利用C++的多态  
 ```c++
 nua::Context ctx;

@@ -43,10 +43,10 @@ namespace nua
 
         void operator()(const char* code)
         {
-            stack::StackGuard sg{lua_ctx_};
+            StackGuard sg{lua_ctx_};
             
             int status = luaL_dostring(lua_ctx_, code);
-            if(status)
+            if(status != LUA_OK)
                 ErrorHandler::handle(lua_ctx_, status);
         }
 
@@ -57,14 +57,14 @@ namespace nua
 
         void load(const std::string& file)
         {
-            stack::StackGuard sg{lua_ctx_};
+            StackGuard sg{lua_ctx_};
            
             int status = luaL_loadfile(lua_ctx_, file.c_str()); 
-            if(status)
+            if(status != LUA_OK)
                 ErrorHandler::handle(lua_ctx_, status);     /**< handle is noreturn */
 
             status = lua_pcall(lua_ctx_, 0, LUA_MULTRET, 0);
-            if(status)
+            if(status != LUA_OK)
                 ErrorHandler::handle(lua_ctx_, status);
         }
 
