@@ -1,6 +1,5 @@
 #include "UnitTest.hh"
-#include "nua/MetatableRegistry.hh"
-#include "nua/ScopeGuard.hh"
+#include "nua/nua.hh"
 
 TEST_CASE(get_typename)
 {

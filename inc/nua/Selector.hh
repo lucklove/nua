@@ -1,14 +1,4 @@
 #pragma once
-#include <lua.hpp>
-#include <string>
-#include <vector>
-#include <tuple>
-#include "LuaRef.hh"
-#include "stack.hh"
-#include "Func.hh"
-#include "Registry.hh"
-#include "utils.hh"
-#include "StackGuard.hh"
 
 namespace nua
 {

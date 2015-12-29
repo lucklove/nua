@@ -1,8 +1,4 @@
 #pragma once
-#include <tuple>
-#include <functional>
-#include "stack.hh"
-#include "BaseFunc.hh"
 
 namespace nua
 {

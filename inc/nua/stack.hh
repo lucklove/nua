@@ -1,13 +1,4 @@
 #pragma once
-#include <lua.hpp>
-#include <iostream>
-#include "primitives.hh"
-#include "MetatableRegistry.hh"
-#include "types.hh"
-#include "ScopeGuard.hh"
-#include "ErrorHandler.hh"
-#include "LuaRef.hh"
-#include "function.hh"
 
 namespace nua
 {

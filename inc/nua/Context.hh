@@ -1,11 +1,4 @@
 #pragma once
-#include <stdexcept>
-#include <lua.hpp>
-#include <string>
-#include "stack.hh"
-#include "ErrorHandler.hh"
-#include "Selector.hh"
-#include "Registry.hh"
 
 namespace nua
 {

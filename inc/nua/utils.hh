@@ -1,6 +1,4 @@
 #pragma once
-#include "LuaRef.hh"
-#include "stack.hh"
 
 namespace nua
 {

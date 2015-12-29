@@ -1,9 +1,4 @@
 #pragma once
-#include <lua.hpp>
-#include <string>
-#include <typeindex>
-#include <cstring>
-#include "primitives.hh"
 
 namespace nua
 {

@@ -1,0 +1,64 @@
+LuaRef: none
+ScopeGuard: none
+ExceptionHolder: none
+StackGuard:
+    ScopeGuard
+ErrorHandler:
+    ExceptionHolder
+function:
+    LuaRef 
+    ErrorHandler
+    StackGuard
+primitives: 
+    function
+MetatableRegistry:
+    primitives
+types:
+    MetatableRegistry
+stack:
+    primitives
+    MetatableRegistry
+    types
+    ScopeGuard
+    ErrorHandler
+    LuaRef
+    function
+BaseFunc:
+    stack
+    ExceptionHolder
+ClassFunc:
+    BaseFunc
+Dtor:
+    BaseFunc
+Func:
+    stack
+    BaseFunc
+Class:
+    MetatableRegistry
+    BaseFunc
+    Func
+    ClassFunc
+    Dtor
+Registry:
+    Func
+    Class
+utils:
+    LuaRef
+    stack   
+Selector:
+    LuaRef
+    stack
+    Func
+    Registry
+    utils
+    StackGuard
+Context:
+    stack
+    ErrorHandler
+    Selector
+    Registry
+function_impl:
+    function
+    utils
+    StackGuard
+    ErrorHandler

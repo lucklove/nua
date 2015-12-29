@@ -1,8 +1,4 @@
 #pragma once
-#include <lua.hpp>
-#include <stdexcept>
-#include <string>
-#include "ExceptionHolder.hh"
 
 namespace nua
 {

@@ -1,5 +1,4 @@
 #pragma once
-#include "BaseFunc.hh"
 
 namespace nua
 {

@@ -1,10 +1,4 @@
 #pragma once
-#include <lua.hpp>
-#include "MetatableRegistry.hh"
-#include "BaseFunc.hh"
-#include "Func.hh"
-#include "ClassFunc.hh"
-#include "Dtor.hh"
 
 namespace nua
 {

@@ -1,9 +1,4 @@
 #pragma once
-#include <lua.hpp>
-#include <memory>
-#include "MetatableRegistry.hh"
-#include "Func.hh"
-#include "Class.hh"
 
 namespace nua
 {
