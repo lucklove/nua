@@ -1,4 +1,14 @@
 #pragma once
+/**
+ * \need:
+ *      MetatableRegistry.hh for class MetatableRegistry
+ *      primitives.hh for template class is_primitive
+ *      types.hh for template function check::is_type
+ *      ScopeGuard.hh for class ScopeGuard
+ *      ErrorHandler.hh for class ErrorHandler
+ *      LuaRef.hh for class LuaRef
+ *      function.hh for template class function
+ */
 
 namespace nua
 {

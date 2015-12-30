@@ -1,4 +1,11 @@
 #pragma once
+/**
+ * \need:
+ *      function.hh for template class function
+ *      utils.hh for template function utils::get_n
+ *      StackGuard.hh for class StackGuard
+ *      ErrorHanlder.hh for class ErrorHandler 
+ */
 
 namespace nua
 {

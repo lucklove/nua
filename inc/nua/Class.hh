@@ -1,5 +1,12 @@
 #pragma once
-
+/**
+ * \need:
+ *      MetatableRegistry.hh for class MetatableRegistry
+ *      BaseFunc.hh for class BaseFunc
+ *      ClassFunc.hh for template class ClassFunc 
+ *      Dtor.hh for template class Dtor       
+ */
+       
 namespace nua
 {
     struct BaseClass

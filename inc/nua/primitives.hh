@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * \need:
+ *      function.hh for template class function
+ */
 
 namespace nua
 {

@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * \need:
+ *      ExceptionHolder.hh for class ExceptionHolder
+ */
 
 namespace nua
 {

@@ -1,4 +1,10 @@
 #pragma once
+/**
+ * \need:
+ *      LuaRef.hh for class LuaRef
+ *      ErrorHandler.hh for class ErrorHandler
+ *      StackGuard.hh for class StackGuard
+ */
 
 namespace nua
 {

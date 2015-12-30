@@ -1,8 +1,11 @@
 #pragma once
+/**
+ * \need:
+ *      utils.hh for function utils::apply_n
+ *      BaseFunc.hh for class BaseFunc
+ */
 
 namespace nua
-{
-namespace detail
 {
     template <typename Ret, typename... Args>
     struct TrivialFunction : BaseFunc
@@ -19,31 +22,30 @@ namespace detail
     protected:
         func_t func_;
     };
-}
 
     template <typename Ret, typename... Args>
-    struct Func : public detail::TrivialFunction<Ret, Args...>
+    struct Func : public TrivialFunction<Ret, Args...>
     {
-        using detail::TrivialFunction<Ret, Args...>::TrivialFunction;
+        using TrivialFunction<Ret, Args...>::TrivialFunction;
 
         int apply(lua_State* l) override
         {
-            detail::apply_n(l, 
-                detail::TrivialFunction<Ret, Args...>::func_, 
+            utils::apply_n(l, 
+                TrivialFunction<Ret, Args...>::func_, 
                 std::make_index_sequence<sizeof...(Args)>());        
             return !std::is_same<Ret, void>::value;
         }        
     };
 
     template <typename... Rets, typename... Args>
-    struct Func<std::tuple<Rets...>, Args...> : public detail::TrivialFunction<std::tuple<Rets...>, Args...>
+    struct Func<std::tuple<Rets...>, Args...> : public TrivialFunction<std::tuple<Rets...>, Args...>
     {
-        using detail::TrivialFunction<std::tuple<Rets...>, Args...>::TrivialFunction;
+        using TrivialFunction<std::tuple<Rets...>, Args...>::TrivialFunction;
 
         int apply(lua_State* l) override
         {
-            detail::apply_n(l, 
-                detail::TrivialFunction<std::tuple<Rets...>, Args...>::func_, 
+            utils::apply_n(l, 
+                TrivialFunction<std::tuple<Rets...>, Args...>::func_, 
                 std::make_index_sequence<sizeof...(Rets)>(),  
                 std::make_index_sequence<sizeof...(Args)>()); 
             return sizeof...(Rets);

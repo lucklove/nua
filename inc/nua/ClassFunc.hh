@@ -1,8 +1,11 @@
 #pragma once
+/**
+ * \need:
+ *      utils.hh for function utils::apply_n 
+ *      BaseFunc.hh for class BaseFunc
+ */
 
 namespace nua
-{
-namespace detail
 {
     template <typename T, typename Ret, typename... Args>
     class BaseClassFunc : public BaseFunc
@@ -23,9 +26,9 @@ namespace detail
             lua_setfield(l, -2, name.c_str());      
         }                   
     };
-}
+
     template <typename T, typename Ret, typename... Args>
-    class ClassFunc : public detail::BaseClassFunc<T, Ret, Args...>
+    class ClassFunc : public BaseClassFunc<T, Ret, Args...>
     {
     protected:
         int apply_impl(lua_State* l, T* ptr)
@@ -35,12 +38,12 @@ namespace detail
                 return this->func_(ptr, args...);
             };
 
-            detail::apply_n(l, func, std::make_index_sequence<sizeof...(Args)>());
+            utils::apply_n(l, func, std::make_index_sequence<sizeof...(Args)>());
             return !std::is_same<Ret, void>::value;         
         }
 
     public:
-        using detail::BaseClassFunc<T, Ret, Args...>::BaseClassFunc;
+        using BaseClassFunc<T, Ret, Args...>::BaseClassFunc;
  
         int apply(lua_State* l) override
         {
@@ -62,7 +65,7 @@ namespace detail
     };
 
     template <typename T, typename... Rets, typename... Args>
-    struct ClassFunc<T, std::tuple<Rets...>, Args...> : detail::BaseClassFunc<T, std::tuple<Rets...>, Args...>
+    struct ClassFunc<T, std::tuple<Rets...>, Args...> : BaseClassFunc<T, std::tuple<Rets...>, Args...>
     {
     protected:
         int apply_impl(lua_State* l, T* ptr)
@@ -72,7 +75,7 @@ namespace detail
                 return this->func_(ptr, args...);
             };
 
-            detail::apply_n(l,
+            utils::apply_n(l,
                 func,
                 std::make_index_sequence<sizeof...(Rets)>(),
                 std::make_index_sequence<sizeof...(Args)>()); 
@@ -80,7 +83,7 @@ namespace detail
         }
 
     public:
-        using detail::BaseClassFunc<T, std::tuple<Rets...>, Args...>::BaseClassFunc;
+        using BaseClassFunc<T, std::tuple<Rets...>, Args...>::BaseClassFunc;
 
         int apply(lua_State* l) override
         {

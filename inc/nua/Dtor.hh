@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * \need:
+ *      BaseFunc.hh for class BaseFunc
+ */
 
 namespace nua
 {

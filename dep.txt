@@ -1,6 +1,7 @@
 LuaRef: none
 ScopeGuard: none
 ExceptionHolder: none
+MetatableRegistry: none
 StackGuard:
     ScopeGuard
 ErrorHandler:
@@ -11,8 +12,6 @@ function:
     StackGuard
 primitives: 
     function
-MetatableRegistry:
-    primitives
 types:
     MetatableRegistry
 stack:
@@ -24,36 +23,33 @@ stack:
     LuaRef
     function
 BaseFunc:
-    stack
     ExceptionHolder
+utils:
+    LuaRef
+    stack   
 ClassFunc:
+    utils
     BaseFunc
 Dtor:
     BaseFunc
 Func:
-    stack
+    utils
     BaseFunc
 Class:
     MetatableRegistry
     BaseFunc
-    Func
     ClassFunc
     Dtor
 Registry:
     Func
     Class
-utils:
-    LuaRef
-    stack   
 Selector:
     LuaRef
     stack
-    Func
     Registry
     utils
     StackGuard
 Context:
-    stack
     ErrorHandler
     Selector
     Registry

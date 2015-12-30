@@ -1,4 +1,12 @@
 #pragma once
+/**
+ * \need:
+ *      LuaRef.hh for class LuaRef
+ *      stack.hh for stack operations
+ *      Registry.hh for class Registry
+ *      utils.hh for function make_lua_ref
+ *      StackGuard for class StackGuard 
+ */
 
 namespace nua
 {

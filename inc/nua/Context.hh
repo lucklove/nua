@@ -1,4 +1,10 @@
 #pragma once
+/**
+ * \need:
+ *      Selector.hh for class Selector
+ *      ErrorHandler for class ErrorHandler
+ *      Registry.hh for class Registry
+ */
 
 namespace nua
 {

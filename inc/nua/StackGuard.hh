@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * \need:
+ *      ScopeGuard.hh for class ScopeGuard
+ */
 
 namespace nua
 {

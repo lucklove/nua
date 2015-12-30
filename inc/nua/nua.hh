@@ -9,6 +9,7 @@
 #include <typeindex>
 #include <tuple>
 #include <vector>
+#include "MetatableRegistry.hh"
 #include "LuaRef.hh"
 #include "ScopeGuard.hh"
 #include "ExceptionHolder.hh"
@@ -16,16 +17,15 @@
 #include "ErrorHandler.hh"
 #include "function.hh"
 #include "primitives.hh"
-#include "MetatableRegistry.hh"
 #include "types.hh"
 #include "stack.hh"
 #include "BaseFunc.hh"
+#include "utils.hh"
 #include "ClassFunc.hh"
 #include "Dtor.hh"
 #include "Func.hh"
 #include "Class.hh"
 #include "Registry.hh"
-#include "utils.hh"
 #include "Selector.hh"
 #include "Context.hh"
 #include "function_impl.hh"
