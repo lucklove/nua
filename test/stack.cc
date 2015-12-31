@@ -88,8 +88,10 @@ TEST_CASE(push_pop)
     nua::stack::push(l, true);
     nua::stack::push(l, nullptr);
     nua::stack::push(l, 3);
+    nua::stack::push(l, 3.1415926f);
     
     /** clang bug, will fail with clang */
+    TEST_CHECK(nua::stack::pop<float>(l) == 3.1415926f);
     TEST_CHECK(nua::stack::pop<int>(l) == 3);
     TEST_CHECK(nua::stack::pop<std::nullptr_t>(l) == nullptr);
     TEST_CHECK(nua::stack::pop<bool>(l) == true);   

@@ -15,7 +15,7 @@ namespace nua
     namespace stack
     {
         template <typename T>
-        typename std::enable_if<std::is_copy_constructible<T>::value, void>::type 
+        typename std::enable_if<std::is_copy_constructible<T>::value && !is_primitive<T>::value, void>::type 
         push(lua_State* l, const T& t)
         {
             T* ptr = (T*)lua_newuserdata(l, sizeof(T));
@@ -40,7 +40,7 @@ namespace nua
         {
             lua_pushinteger(l, v);
         }
-    
+   
         inline void push(lua_State* l, lua_Number v)
         {
             lua_pushnumber(l, v);
