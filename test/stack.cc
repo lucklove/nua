@@ -116,7 +116,7 @@ TEST_CASE(implicit_numeric_convert)
     TEST_CHECK(nua::stack::pop<int>(l) == 47);
 }
 
-TEST_CASE(should_throw_bad_cast)
+TEST_CASE(should_throw)
 {
     lua_State* l = luaL_newstate();
     TEST_REQUIRE(l);
@@ -126,10 +126,9 @@ TEST_CASE(should_throw_bad_cast)
     lua_pushstring(l, "nua");
     try
     {
-        std::cout << "there should be an exception, just ignore it:" << std::endl;
         TEST_CHECK(nua::stack::get<int>(l, -1) && false, "you should not see this");
     }
-    catch(std::runtime_error&)
+    catch(nua::NuaPrimitiveTypeError&)
     {
         flag = true;
     }

@@ -92,6 +92,41 @@ namespace nua
             enum { value = decltype(check<T>(0))::value };
         };
 
+        template <typename FuncT>
+        auto checked_get(FuncT&& func) -> decltype(func()) 
+        {
+            int expected_type = LUA_TNONE;
+            const char *wrong_meta_table = nullptr;
+            int param_index = 0;
+
+            try
+            {
+                return func();
+            }
+            catch(NuaPrimitiveTypeError& e)
+            {
+                expected_type = e.expected_type;
+                param_index = e.index;
+            }
+            catch(NuaUserDataTypeError& e)
+            {
+                wrong_meta_table = lua_pushlstring(l_, e.metatable_name.c_str(), e.metatable_name.length());
+                param_index = e.index;
+            }
+
+            ErrorHandler::set_atpanic(l_);
+            if(expected_type != LUA_TNONE)
+            {
+                luaL_checktype(l_, param_index, expected_type);
+            }
+            else if(wrong_meta_table)
+            {
+                luaL_checkudata(l_, param_index, wrong_meta_table);
+            }
+            
+            throw "should not reach here";
+        }
+
     public:
         Selector(lua_State* l, Registry* registry, const std::string& name)
             : l_{l}, name_{name}, registry_{registry}, key_{utils::make_lua_ref(l, name)}
@@ -147,24 +182,33 @@ namespace nua
 
         void get()
         {
-            StackGuard sg{l_};
-            evaluate_retrieve(0);
+            checked_get([&]
+            {
+                StackGuard sg{l_};
+                evaluate_retrieve(0);
+            });
         }
 
         template <typename T>
         T get()
         {
-            StackGuard sg{l_};
-            evaluate_retrieve(1);
-            return stack::pop<T>(l_);
+            return checked_get([&]() -> T
+            {
+                StackGuard sg{l_};
+                evaluate_retrieve(1);
+                return stack::pop<T>(l_);
+            });
         }
 
         template <typename T1, typename T2, typename... Args>
         std::tuple<T1, T2, Args...> get()
         {
-            StackGuard sg{l_};
-            evaluate_retrieve(sizeof...(Args) + 2);
-            return utils::get_n<T1, T2, Args...>(l_, std::make_index_sequence<sizeof...(Args) + 2>());
+            return checked_get([&]() -> std::tuple<T1, T2, Args...>
+            {
+                StackGuard sg{l_};
+                evaluate_retrieve(sizeof...(Args) + 2);
+                return utils::get_n<T1, T2, Args...>(l_, std::make_index_sequence<sizeof...(Args) + 2>());
+            });
         }
     };
 }

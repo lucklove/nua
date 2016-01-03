@@ -83,7 +83,7 @@ namespace nua
             if(std::is_lvalue_reference<T>::value 
                 && !(check::is_type<std::reference_wrapper<value_t>>(l, index) 
                     || check::is_type<std::reference_wrapper<typename std::remove_cv<value_t>::type>>(l, index)))
-                goto fail;
+                throw NuaUserDataTypeError{MetatableRegistry::get_typename<T>(l), index};
     
             if(check::is_type<value_t>(l, index))
             {
@@ -99,11 +99,7 @@ namespace nua
                 return **ptr;   
             }
     
-            fail:
-            std::string metatable_name = MetatableRegistry::get_typename<T>(l);
-            ErrorHandler::set_atpanic(l);
-            luaL_checkudata(l, index, metatable_name.c_str());
-            throw "should not reach here";
+            throw NuaUserDataTypeError{MetatableRegistry::get_typename<T>(l), index};
         }
     
         template <typename T>
@@ -117,18 +113,23 @@ namespace nua
             else if(lua_isinteger(l, index))
             {
                 return lua_tointeger(l, index);
+            } 
+            else if(lua_isnumber(l, index))
+            {
+                return lua_tonumber(l, index);
             }
     
-            ErrorHandler::set_atpanic(l);
-            return luaL_checknumber(l, index);
+            throw NuaPrimitiveTypeError{LUA_TNUMBER, index};
         }
     
         template <typename T>
         typename std::enable_if<std::is_same<T, std::string>::value, std::string>::type
         get(lua_State* l, int index)
         {
-            ErrorHandler::set_atpanic(l);
-            return luaL_checkstring(l, index);
+            if(lua_isstring(l, index))
+                return lua_tostring(l, index);
+
+            throw NuaPrimitiveTypeError{LUA_TSTRING, index};
         }
     
         template <typename T>
@@ -137,9 +138,7 @@ namespace nua
         {
             if(!lua_isnil(l, index))
             {
-                ErrorHandler::set_atpanic(l);
-                luaL_checktype(l, index, LUA_TNIL);
-                throw "should not reach here";
+                throw NuaPrimitiveTypeError{LUA_TNIL, index};
             }
     
             return nullptr;

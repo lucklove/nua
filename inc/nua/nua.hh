@@ -13,6 +13,7 @@
 #include "LuaRef.hh"
 #include "ScopeGuard.hh"
 #include "ExceptionHolder.hh"
+#include "exception.hh"
 #include "StackGuard.hh"
 #include "ErrorHandler.hh"
 #include "function.hh"

@@ -4,18 +4,18 @@
 TEST_CASE(user_type)
 {
     struct T {};
-    struct F {};
+    struct F {}; 
 
     nua::Context ctx;
     ctx.setClass<T>();
     ctx.setClass<F>();
 
     ctx["foo"] = [](T){};
-    
+
     bool f = false;
     try
     {
-        ctx["foo"](F{});
+        ctx["foo"](F{}).get();
         TEST_REQUIRE(false, "期待一个异常，但是没有检测到");
     }
     catch(...)
@@ -24,6 +24,7 @@ TEST_CASE(user_type)
     }
     TEST_CHECK(f, "异常测试失败");
 
+/*    
     ctx(R"(
         function bar()
             return 123
@@ -58,6 +59,7 @@ TEST_CASE(user_type)
         f = true;
     }
     TEST_CHECK(f, "异常测试失败");
+*/
 }
 
 TEST_CASE(primitive_type)

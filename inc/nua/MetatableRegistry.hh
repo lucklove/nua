@@ -73,7 +73,7 @@ namespace nua
             push_typeinfo<T>(ctx);
             lua_pushvalue(ctx, -3);
             lua_settable(ctx, -3);
-            lua_pop(ctx, 1);    /**< XXX: 这里应该pop 2? */
+            lua_pop(ctx, 1);
         }
 
         template <typename T>

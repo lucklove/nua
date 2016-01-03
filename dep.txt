@@ -2,6 +2,7 @@ LuaRef: none
 ScopeGuard: none
 ExceptionHolder: none
 MetatableRegistry: none
+exception: none
 StackGuard:
     ScopeGuard
 ErrorHandler:
