@@ -24,7 +24,6 @@ TEST_CASE(user_type)
     }
     TEST_CHECK(f, "异常测试失败");
 
-/*    
     ctx(R"(
         function bar()
             return 123
@@ -59,7 +58,6 @@ TEST_CASE(user_type)
         f = true;
     }
     TEST_CHECK(f, "异常测试失败");
-*/
 }
 
 TEST_CASE(primitive_type)

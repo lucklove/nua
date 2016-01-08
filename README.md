@@ -3,7 +3,7 @@
 Simple C++11 friendly header-only bindings to Lua  
 
 A component of [PM-Game-Server](https://github.com/lucklove/PM-Game-Server).   
-Reference to [Selene](https://github.com/jeremyong/Selene) and fix some features to meet the PM-Game-Server's demand   
+Reference to [Selene](https://github.com/jeremyong/Selene) and fix some features to meet the PM-Game-Server's requirements   
 
 ---
 
