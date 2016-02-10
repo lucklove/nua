@@ -29,16 +29,32 @@ namespace nua
                 luaL_openlibs(lua_ctx_);
         }
 
+        Context(Context&& other)
+            : lua_ctx_{other.lua_ctx_}, registry_{std::move(other.registry_)}
+        {
+            other.lua_ctx_ = nullptr;
+        }
+
+        Context& operator=(Context&& other)
+        {
+            if(&other == this) return *this;
+            lua_ctx_ = other.lua_ctx_;
+            registry_ = std::move(other.registry_);
+            other.lua_ctx_ = nullptr;
+            return *this;
+        }
+
         ~Context()
         {
-            forceGC();
-            lua_close(lua_ctx_);
+            if(lua_ctx_)
+            {
+                forceGC();
+                lua_close(lua_ctx_);
+            }
         }
 
         Context(const Context&) = delete;
-        Context(Context&&) = delete;
         Context& operator=(const Context&) = delete;
-        Context& operator=(Context&&) = delete;
 
         void operator()(const char* code)
         {

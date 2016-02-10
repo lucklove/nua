@@ -8,6 +8,7 @@ SET(TEST_SOURCES
     primitives.cc
     set_class.cc
     type_error.cc
+    reference_and_value_combination.cc
     function.cc
 )
 
