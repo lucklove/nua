@@ -164,7 +164,7 @@ ctx["apply"](std::cref(rt));
 - pass reference of primitive type to nua
 - return reference of primitive type in the function you registered to nua
 - use non-const reference of primitive type as args in the function you registered to nua
-- return reference of primitive type from nua to c++
+- return reference of primitive type from nua to c++  
 The primitive types include:
 - all number type in c++(bool, char, unsigned char, int, etc).
 - std::string
