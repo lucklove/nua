@@ -50,28 +50,6 @@ TEST_CASE(return_multi)
     TEST_CHECK(std::get<2>(t) == 3);
 }
 
-TEST_CASE(as_arg)
-{
-    nua::Context ctx;
-
-    ctx["take_fun_arg"] = [](nua::function<int(int, int)> func, int a, int b) 
-    {
-        return func(a, b);
-    };
-
-    ctx(R"(
-        function add(a, b)
-            return a + b
-        end
-
-        function pass_add(x, y)
-            return take_fun_arg(add, x, y)
-        end
-    )");
-
-    TEST_CHECK(ctx["pass_add"](3, 5).get<int>() == 8);
-}
-
 TEST_CASE(closure)
 {
     nua::Context ctx;

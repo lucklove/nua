@@ -10,7 +10,7 @@
 namespace nua
 {
     template <typename Ret, typename... Args>
-    Ret function<Ret(Args...)>::operator()(Args... args)
+    Ret function<Ret(Args...)>::operator()(Args... args) const
     {
         StackGuard sg{l_};
         int handler_index = ErrorHandler::set_error_handler(l_);
@@ -21,7 +21,7 @@ namespace nua
     }
 
     template <typename... Args>
-    void function<void(Args...)>::operator()(Args... args)
+    void function<void(Args...)>::operator()(Args... args) const
     {
         StackGuard sg{l_};
         int handler_index = ErrorHandler::set_error_handler(l_);
@@ -31,7 +31,7 @@ namespace nua
     }
 
     template <typename... Rets, typename... Args>
-    std::tuple<Rets...> function<std::tuple<Rets...>(Args...)>::operator()(Args... args)
+    std::tuple<Rets...> function<std::tuple<Rets...>(Args...)>::operator()(Args... args) const
     {
         StackGuard sg{l_};
         int handler_index = ErrorHandler::set_error_handler(l_);

@@ -75,7 +75,7 @@ namespace nua
         }
             
         template <typename T>
-        typename std::enable_if<!is_primitive<T>::value, T>::type
+        typename std::enable_if<!is_primitive<typename std::decay<T>::type>::value, T>::type
         get(lua_State* l, int index)
         {
             static_assert(!std::is_rvalue_reference<T>::value, "not support rvalue reference");
@@ -103,7 +103,10 @@ namespace nua
         }
     
         template <typename T>
-        typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
+        typename std::enable_if<
+            std::is_integral<typename std::decay<T>::type>::value || std::is_floating_point<typename std::decay<T>::type>::value, 
+            typename std::decay<T>::type
+        >::type
         get(lua_State* l, int index)
         {
             if(lua_isboolean(l, index))
@@ -123,7 +126,7 @@ namespace nua
         }
     
         template <typename T>
-        typename std::enable_if<std::is_same<T, std::string>::value, std::string>::type
+        typename std::enable_if<std::is_same<typename std::decay<T>::type, std::string>::value, std::string>::type
         get(lua_State* l, int index)
         {
             if(lua_isstring(l, index))
@@ -133,7 +136,7 @@ namespace nua
         }
     
         template <typename T>
-        typename std::enable_if<std::is_same<T, std::nullptr_t>::value, std::nullptr_t>::type
+        typename std::enable_if<std::is_same<typename std::decay<T>::type, std::nullptr_t>::value, std::nullptr_t>::type
         get(lua_State* l, int index)
         {
             if(!lua_isnil(l, index))
@@ -145,7 +148,10 @@ namespace nua
         }
     
         template <typename T>
-        typename std::enable_if<std::is_base_of<nua::function_base, T>::value, T>::type
+        typename std::enable_if<
+            std::is_base_of<nua::function_base, typename std::decay<T>::type>::value, 
+            typename std::decay<T>::type
+        >::type
         get(lua_State* l, int index)
         {
             lua_pushvalue(l, index);

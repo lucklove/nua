@@ -39,7 +39,7 @@ namespace nua
         using function_base::function_base;
         using function_base::push; 
     
-        Ret operator()(Args... args);
+        Ret operator()(Args... args) const;
     };
 
     template <typename... Args>
@@ -48,7 +48,7 @@ namespace nua
         using function_base::function_base;
         using function_base::push; 
 
-        void operator()(Args... args);
+        void operator()(Args... args) const;
     };
     
     template <typename... Rets, typename... Args>
@@ -57,7 +57,7 @@ namespace nua
         using function_base::function_base;
         using function_base::push; 
 
-        std::tuple<Rets...> operator()(Args... args);
+        std::tuple<Rets...> operator()(Args... args) const;
     };
 }
         
