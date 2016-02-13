@@ -161,8 +161,8 @@ ctx["apply"](std::cref(rt));
 ---
 
 ##注意  
-- 基本类型的对象的*引用*不能传递给nua, 也不能在传递给nua的函数中作为参数或返回值, 也不能从lua返回, 
-基本类型包括所有的数字类型, std::string, std::nullptr_t 
+- 基本类型的对象的*引用*不能传递给nua, 也不能在传递给nua的函数中作为返回值(仅const引用可以作为参数), 也不能从lua返回, 
+基本类型包括所有的数字类型, std::string, std::nullptr_t, nua::function   
 ```c++
 ctx(R"(
     function foo(x)
@@ -174,13 +174,13 @@ ctx["foo"](std::ref(x));   /**< 非法 */
 ctx["foo"](std::cref(x));  /**< 非法 */
 ```
 
-另外, 注意到std::string也是基本类型, 所以以下函数是代码是非法的:  
+另外, 注意到std::string也是基本类型:  
 ```c++
-ctx["foo"] = [](const std::string& s) {...};    /**< 非法, 试图接收基础类型的引用 */
-ctx["foo"] = []() -> std::string& {...};        /**< 非法, 试图返回基础类型的引用 */
+ctx["foo"] = [](const std::string& s) {...};        /**< 合法, 接收基础类型的const引用 */
+ctx["foo"] = []() -> const std::string& {...};      /**< 非法, 试图返回基础类型的引用 */
 ```
 
-- 在传入nua时是reference的对象才可以以reference的形式返回C++, 切必须保证const修饰正确  
+- 以reference传入nua的对象才可以以reference的形式返回C++, 并且要保证const修饰正确  
 ```c++
 struct T
 {
@@ -194,8 +194,8 @@ ctx(R"(
 )");  
 
 T t;
-ctx["forward_ref"](t).get<const T&>();                  /**< 非法, runtime error */
-ctx["forward_ref"](t).get<T&>();                        /**< 非法, runtime error */
+ctx["forward_ref"](t).get<const T&>();                  /**< 非法, 要求返回t的reference但是传入时不是引用 */
+ctx["forward_ref"](t).get<T&>();                        /**< 非法, 要求返回t的reference但是传入时不是引用 */
 ctx["forward_ref"](std::ref(t)).get<const T&>();        /**< 合法 */
 ctx["forward_ref"](std::cref(t)).get<const T&>();       /**< 合法 */
 ctx["forward_ref"](std::cref(t)).get<T&>();             /**< 非法, 不能从const reference转到reference */

@@ -158,3 +158,51 @@ ctx(R"(
 )");
 ctx["apply"](std::cref(rt));
 ```
+
+##Note
+### You can *not* 
+- pass reference of primitive type to nua
+- return reference of primitive type in the function you registered to nua
+- use non-const reference of primitive type as args in the function you registered to nua
+- return reference of primitive type from nua to c++
+The primitive types include:
+- all number type in c++(bool, char, unsigned char, int, etc).
+- std::string
+- std::nullptr_t
+- nua::function
+```c++
+ctx(R"(
+    function foo(x)
+    end 
+)");
+int x = 0;
+ctx["foo"](x);             /**< ok */  
+ctx["foo"](std::ref(x));   /**< runtime error, x is of primitive type */  
+ctx["foo"](std::cref(x));  /**< runtime error, x is of primitive type */  
+```
+
+Note that std::string is also of primitive type:
+```c++
+ctx["foo"] = [](const std::string& s) {...};        /**< ok, receive const reference of primitive type */  
+ctx["foo"] = []() -> const std::string& {...};      /**< runtime error, return reference of primitive type */  
+```
+### An object can be return from lua to c++ as reference, only if it was passed to lua as reference before, and the const-qualiﬁers must be correct.
+```c++
+struct T
+{
+};
+
+ctx.setClass<T>();
+ctx(R"(
+    function forward_ref(x)
+        return x
+    end
+)");
+
+T t;
+ctx["forward_ref"](t).get<const T&>();                  /**< runtime error, expect a reference of a non-reference object */
+ctx["forward_ref"](t).get<T&>();                        /**< runtime error, expect a reference of a non-reference object */
+ctx["forward_ref"](std::ref(t)).get<const T&>();        /**< ok, non-const reference can be translate to its' const version */
+ctx["forward_ref"](std::cref(t)).get<const T&>();       /**< ok */
+ctx["forward_ref"](std::cref(t)).get<T&>();             /**< runtime error, const reference can't be translate to non-const one */
+```
