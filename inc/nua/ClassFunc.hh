@@ -1,7 +1,7 @@
 #pragma once
 /**
  * \need:
- *      utils.hh for function utils::apply_n 
+ *      utils.hh for function utils::apply_n
  *      BaseFunc.hh for class BaseFunc
  */
 
@@ -12,7 +12,7 @@ namespace nua
     {
     protected:
         using func_t = std::function<Ret(T*, Args...)>;
-        
+
         func_t func_;
         std::string name_;
         std::string metatable_name_;
@@ -23,8 +23,8 @@ namespace nua
         {
             lua_pushlightuserdata(l, (void *)static_cast<BaseFunc*>(this));
             lua_pushcclosure(l, &BaseFunc::dispatcher, 1);
-            lua_setfield(l, -2, name.c_str());      
-        }                   
+            lua_setfield(l, -2, name.c_str());
+        }
     };
 
     template <typename T, typename Ret, typename... Args>
@@ -39,17 +39,17 @@ namespace nua
             };
 
             utils::apply_n(l, func, std::make_index_sequence<sizeof...(Args)>());
-            return !std::is_same<Ret, void>::value;         
+            return !std::is_same<Ret, void>::value;
         }
 
     public:
         using BaseClassFunc<T, Ret, Args...>::BaseClassFunc;
- 
+
         int apply(lua_State* l) override
         {
             T* ptr = (T*)luaL_checkudata(l, 1, this->metatable_name_.c_str());
             return apply_impl(l, ptr);
-        }   
+        }
     };
 
     template <typename T, typename Ret, typename... Args>
@@ -61,7 +61,7 @@ namespace nua
         {
             T* ptr = *(T**)luaL_checkudata(l, 1, this->metatable_name_.c_str());
             return this->apply_impl(l, ptr);
-        }   
+        }
     };
 
     template <typename T, typename... Rets, typename... Args>
@@ -78,8 +78,8 @@ namespace nua
             utils::apply_n(l,
                 func,
                 std::make_index_sequence<sizeof...(Rets)>(),
-                std::make_index_sequence<sizeof...(Args)>()); 
-            return sizeof...(Rets); 
+                std::make_index_sequence<sizeof...(Args)>());
+            return sizeof...(Rets);
         }
 
     public:
@@ -93,7 +93,7 @@ namespace nua
     };
 
     template <typename T, typename... Rets, typename... Args>
-    struct ClassFunc<std::reference_wrapper<T>, std::tuple<Rets...>, Args...> 
+    struct ClassFunc<std::reference_wrapper<T>, std::tuple<Rets...>, Args...>
         : ClassFunc<T, std::tuple<Rets...>, Args...>
     {
     public:

@@ -7,12 +7,12 @@ namespace nua
     private:
         lua_State* l_;
         int ref_;
-    
+
     public:
         LuaRef(lua_State* ctx, int ref)
             : l_{ctx}, ref_{ref}
         {}
-    
+
         LuaRef(lua_State* ctx)
             : LuaRef(ctx, LUA_REFNIL)
         {}
@@ -24,7 +24,7 @@ namespace nua
             other.l_ = nullptr;
             other.ref_ = 0;
         }
-       
+
         ~LuaRef()
         {
             if(l_)

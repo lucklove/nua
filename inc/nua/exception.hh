@@ -11,6 +11,6 @@ namespace nua
     struct NuaUserDataTypeError
     {
         std::string metatable_name;
-        int index;        
+        int index;
     };
 }

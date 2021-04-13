@@ -40,10 +40,10 @@ namespace nua
             lua_remove(ctx, -2);
         }
 
-        static void create(lua_State *ctx) 
+        static void create(lua_State *ctx)
         {
-            create_table(ctx, "nua_metatable_names");   
-            create_table(ctx, "nua_metatables");   
+            create_table(ctx, "nua_metatable_names");
+            create_table(ctx, "nua_metatables");
         }
 
         template <typename T>
@@ -55,7 +55,7 @@ namespace nua
                 std::cout << typeid(T).name() << ": unregistered" << std::endl;
                 throw std::logic_error{"try to use a unregistered type"};
             }
-            
+
             luaL_setmetatable(ctx, name.c_str());
         }
 
@@ -67,7 +67,7 @@ namespace nua
             lua_pushlstring(ctx, name.c_str(), name.size());
             lua_settable(ctx, -3);
             lua_pop(ctx, 1);
-            
+
             luaL_newmetatable(ctx, name.c_str());
             push_metatable(ctx);
             push_typeinfo<T>(ctx);
@@ -80,18 +80,18 @@ namespace nua
         static std::string get_typename(lua_State* ctx)
         {
             std::string name("unregistered type");
-            
+
             push_names_table(ctx);
             push_typeinfo<T>(ctx);
             lua_gettable(ctx, -2);
-            
-            if(lua_isstring(ctx, -1)) 
+
+            if(lua_isstring(ctx, -1))
             {
                 size_t len = 0;
                 char const * str = lua_tolstring(ctx, -1, &len);
                 name.assign(str, len);
             }
-            
+
             lua_pop(ctx, 2);
             return name;
         }
@@ -99,23 +99,23 @@ namespace nua
         static std::string get_typename(lua_State* ctx, int index)
         {
             std::string name;
-            
-            if(lua_getmetatable(ctx, index)) 
+
+            if(lua_getmetatable(ctx, index))
             {
                 lua_pushliteral(ctx, "__name");
                 lua_gettable(ctx, -2);
-                
+
                 if(lua_isstring(ctx, -1))
                 {
                     size_t len = 0;
                     char const * str = lua_tolstring(ctx, -1, &len);
                     name.assign(str, len);
                 }
-                
+
                 lua_pop(ctx, 2);
             }
 
-            if(name.empty()) 
+            if(name.empty())
                 name = lua_typename(ctx, lua_type(ctx, index));
 
             return name;

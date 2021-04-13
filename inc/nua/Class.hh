@@ -3,10 +3,10 @@
  * \need:
  *      MetatableRegistry.hh for class MetatableRegistry
  *      BaseFunc.hh for class BaseFunc
- *      ClassFunc.hh for template class ClassFunc 
- *      Dtor.hh for template class Dtor       
+ *      ClassFunc.hh for template class ClassFunc
+ *      Dtor.hh for template class Dtor
  */
-       
+
 namespace nua
 {
     struct BaseClass
@@ -38,7 +38,7 @@ namespace nua
         template <typename M>
         void register_member(lua_State* l, const std::string& name, M R::*member, std::true_type, std::true_type)
         {
-            std::function<M(R*)> lambda_get = [member](R *t) 
+            std::function<M(R*)> lambda_get = [member](R *t)
             {
                 return t->*member;
             };
@@ -65,7 +65,7 @@ namespace nua
         {
             register_member(l, name, member, std::true_type{});
 
-            std::function<void(R*, M)> lambda_set  = [member](R *t, M v) 
+            std::function<void(R*, M)> lambda_set  = [member](R *t, M v)
             {
                 t->*member = v;
             };
@@ -82,11 +82,11 @@ namespace nua
         template <typename Ret, typename... Args>
         void register_member(lua_State* l, const std::string& name, Ret(R::*func)(Args...), std::false_type)
         {
-            std::function<Ret(R*, Args...)> lambda = [func](R *t, Args... args) -> Ret 
+            std::function<Ret(R*, Args...)> lambda = [func](R *t, Args... args) -> Ret
             {
-                return (t->*func)(std::forward<Args>(args)...);      
+                return (t->*func)(std::forward<Args>(args)...);
             };
-            funcs_.push_back(std::make_unique<ClassFunc<T, Ret, Args...>>(l, name, metatable_name_, lambda));   
+            funcs_.push_back(std::make_unique<ClassFunc<T, Ret, Args...>>(l, name, metatable_name_, lambda));
         }
 
         template <typename Ret, typename... Args, typename IsConst>
@@ -94,11 +94,11 @@ namespace nua
         {
             std::function<Ret(const R*, Args...)> lambda = [func](const R* t, Args... args)
             {
-                return (t->*func)(std::forward<Args>(args)...);      
+                return (t->*func)(std::forward<Args>(args)...);
             };
-            funcs_.push_back(std::make_unique<ClassFunc<T, Ret, Args...>>(l, name, metatable_name_, lambda));   
+            funcs_.push_back(std::make_unique<ClassFunc<T, Ret, Args...>>(l, name, metatable_name_, lambda));
         }
-        
+
         void register_members(lua_State* l)
         {
         }
@@ -107,7 +107,7 @@ namespace nua
         void register_members(lua_State* l, const std::string& name, M member, Ms... members)
         {
             register_member(l, name, member, typename std::is_const<R>::type{});
-            register_members(l, members...);                              
+            register_members(l, members...);
         }
 
         Class() = default;
@@ -124,4 +124,4 @@ namespace nua
             lua_setfield(l, -1, "__index");
         }
     };
-}   
+}

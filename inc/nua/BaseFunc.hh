@@ -1,7 +1,7 @@
 #pragma once
 /**
  * \need:
- *      ExceptionHolder.hh for class ExceptionHolder 
+ *      ExceptionHolder.hh for class ExceptionHolder
  */
 
 namespace nua
@@ -20,7 +20,7 @@ namespace nua
             try
             {
                 BaseFunc* func_ptr = (BaseFunc *)lua_touserdata(l, lua_upvalueindex(1));
-                if(!func_ptr) 
+                if(!func_ptr)
                     throw std::runtime_error{"no function infomation found while try to make a call"};
                 return func_ptr->apply(l);
             }
@@ -48,7 +48,7 @@ namespace nua
             {
                 luaL_checkudata(l, param_index, wrong_meta_table);
             }
- 
+
             return lua_error(l);
         }
     };

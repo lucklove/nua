@@ -5,7 +5,7 @@
  *      stack.hh for stack operations
  *      Registry.hh for class Registry
  *      utils.hh for function make_lua_ref
- *      StackGuard for class StackGuard 
+ *      StackGuard for class StackGuard
  */
 
 namespace nua
@@ -29,19 +29,19 @@ namespace nua
             lua_remove(l_, lua_absindex(l_, -2));
             evaluate_function_call(num_results);
         }
-        
+
         void evaluate_function_call(int num_results)
         {
             if(!functor_active_)
                 return;
             functor_active_ = false;
-    
+
             int handler_index = ErrorHandler::set_error_handler(l_);
             int func_index = handler_index - 1;
             lua_pushvalue(l_, func_index);
             lua_copy(l_, handler_index, func_index);
             lua_replace(l_, handler_index);
-            
+
             for(const LuaRefPtr& arg : functor_arguments_)
                 arg->push();
 
@@ -93,7 +93,7 @@ namespace nua
         };
 
         template <typename FuncT>
-        auto checked_get(FuncT&& func) -> decltype(func()) 
+        auto checked_get(FuncT&& func) -> decltype(func())
         {
             int expected_type = LUA_TNONE;
             const char *wrong_meta_table = nullptr;
@@ -123,7 +123,7 @@ namespace nua
             {
                 luaL_checkudata(l_, param_index, wrong_meta_table);
             }
-            
+
             throw "should not reach here";
         }
 

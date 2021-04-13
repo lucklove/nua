@@ -13,21 +13,21 @@ namespace nua
         lua_State* ctx_;
         std::vector<std::unique_ptr<BaseFunc>> funcs_;
         std::vector<std::unique_ptr<BaseClass>> classes_;
-       
+
         template <typename T>
         struct reference_traits
         {
             using type = T;
-        }; 
+        };
 
         template <typename T>
         struct reference_traits<std::reference_wrapper<T>>
         {
             using type = T;
         };
- 
+
     public:
-        Registry(lua_State* ctx) : ctx_(ctx) 
+        Registry(lua_State* ctx) : ctx_(ctx)
         {
             MetatableRegistry::create(ctx_);
         }

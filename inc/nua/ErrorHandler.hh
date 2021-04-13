@@ -26,7 +26,7 @@ namespace nua
             lua_pushinteger(l, 2);
             lua_call(l, 2, 1);
             return 1;
-        }   
+        }
 
         [[noreturn]]
         static int atpanic(lua_State* l)
@@ -38,7 +38,7 @@ namespace nua
                 if(reason == nullptr)
                     reason = "<unknown panic raason>";
             }
-    
+
             lua_pop(l, lua_gettop(l));
             throw std::runtime_error{reason};
         }

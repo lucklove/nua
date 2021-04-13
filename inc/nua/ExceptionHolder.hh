@@ -10,13 +10,13 @@ namespace nua
             thread_local std::exception_ptr eptr = nullptr;
             return eptr;
         }
-    
+
     public:
         static void set()
         {
             exception_storage() = std::current_exception();
         }
-    
+
         static void check()
         {
             std::exception_ptr eptr = exception_storage();

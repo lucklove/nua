@@ -23,8 +23,8 @@ namespace nua
 
             ErrorHandler::set_atpanic(lua_ctx_);
 
-            registry_ = std::make_unique<Registry>(lua_ctx_); 
- 
+            registry_ = std::make_unique<Registry>(lua_ctx_);
+
             if(should_open_libs)
                 luaL_openlibs(lua_ctx_);
         }
@@ -59,13 +59,13 @@ namespace nua
         void operator()(const char* code)
         {
             StackGuard sg{lua_ctx_};
-            
+
             int status = luaL_dostring(lua_ctx_, code);
             if(status != LUA_OK)
                 ErrorHandler::handle(lua_ctx_, status);
         }
 
-        Selector operator[](const std::string& name) 
+        Selector operator[](const std::string& name)
         {
             return Selector(lua_ctx_, registry_.get(), name);
         }
@@ -73,8 +73,8 @@ namespace nua
         void load(const std::string& file)
         {
             StackGuard sg{lua_ctx_};
-           
-            int status = luaL_loadfile(lua_ctx_, file.c_str()); 
+
+            int status = luaL_loadfile(lua_ctx_, file.c_str());
             if(status != LUA_OK)
                 ErrorHandler::handle(lua_ctx_, status);     /**< handle is noreturn */
 
@@ -92,9 +92,9 @@ namespace nua
         typename std::enable_if<!is_primitive<T>::value, void>::type
         setClass(Funcs... funcs)
         {
-            registry_->registerClass<T>(lua_ctx_, funcs...);   
-            registry_->registerClass<std::reference_wrapper<T>>(lua_ctx_, funcs...);   
-            registry_->registerClass<std::reference_wrapper<const T>>(lua_ctx_, funcs...);   
+            registry_->registerClass<T>(lua_ctx_, funcs...);
+            registry_->registerClass<std::reference_wrapper<T>>(lua_ctx_, funcs...);
+            registry_->registerClass<std::reference_wrapper<const T>>(lua_ctx_, funcs...);
         }
     };
 }
