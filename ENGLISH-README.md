@@ -1,4 +1,4 @@
-#nua
+# nua
 
 Simple C++11 friendly header-only bindings to Lua  
 
@@ -7,15 +7,15 @@ Reference to [Selene](https://github.com/jeremyong/Selene) and fix some features
 
 ---
 
-##Requirements
+## Requirements
 - cmake 2.8+(This is not must if you don't want to compile tests)  
 - lua 5.2+
 - a compiler which support c++14(recommend gcc)  
 
 ---
 
-##Features and Usage  
-###Establishing lua context  
+## Features and Usage  
+### Establishing lua context  
 ```c++
 nua::Context ctx;
 ```
@@ -25,17 +25,17 @@ nua::Context ctx{false};
 ```
 When a nua::Context destruct, the lua context is automatically destroyed in addition to all objects associated with it(including C++ objects). 
 
-###Loading lua script from file  
+### Loading lua script from file  
 ```c++
 ctx.load("path/to/your.lua");
 ```
 
-###Executing lua code in c++ code    
+### Executing lua code in c++ code    
 ```c++
 ctx(R"(print("hello, world"))");
 ```
 
-###Registering c++ function to lua  
+### Registering c++ function to lua  
 ``` c++
 ctx["foo"] = []{ std::cout << "hello, nua" << std::endl; };     /**< lambda */
 ctx["bar"] = std::function<...>(...);                           /**< stl function */
@@ -51,7 +51,7 @@ struct T
 ctx["func"] = callable;                                         /**< callable object */
 ```  
 Then you can call these functions in lua.    
-###Calling lua function in c++  
+### Calling lua function in c++  
 ```c++
 ctx["foo"]();                                                   /**< no return, no parameter */
 ctx["bar"](1, 2, "hello").get<int>();                           /**< get return value with type of int */
@@ -60,7 +60,7 @@ std::string y;
 std::tie(x, y) = ctx["barz"](1, 2, 3).get<int, std::string>();  /**< get more than one return value */
 ```
 
-###Registering Classes  
+### Registering Classes  
 ```c++
 struct T
 {
@@ -83,7 +83,7 @@ T t;
 ctx["bar"](t);
 ```
 
-###Passing reference
+### Passing reference
 Rigistered class can be passed to lua by reference  
 ```c++
 struct T
@@ -97,12 +97,12 @@ ctx["foo"](std::ref(t));
 ctx["bar"](std::cref(t));       /**< when you pass const reference, the set_xxx functions will be omited as well as non-const member function */
 ```
 
-###Returning reference from c++  
+### Returning reference from c++  
 ```c++
 ctx["foo"] = [&]() -> const T& { return t; };
 ```
 
-###Accepting Lua functions as Arguments  
+### Accepting Lua functions as Arguments  
 ```lua
 -- test.lua
 
@@ -126,7 +126,7 @@ ctx.load("test.lua");
 assert(ctx["pass_add"](3, 5) == 8);
 ```
 
-###Making use of c++ polymorphic functions  
+### Making use of c++ polymorphic functions  
 ```c++
 nua::Context ctx;
 
@@ -159,7 +159,7 @@ ctx(R"(
 ctx["apply"](std::cref(rt));
 ```
 
-##Note
+## Note
 You can *not* 
 - pass reference of primitive type to nua
 - return reference of primitive type in the function you registered to nua
