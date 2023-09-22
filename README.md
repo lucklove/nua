@@ -1,4 +1,4 @@
-#nua
+# nua
 
 Simple C++11 friendly header-only bindings to Lua  
 
@@ -7,15 +7,15 @@ Reference to [Selene](https://github.com/jeremyong/Selene) and fix some features
 
 ---
 
-##依赖
+## 依赖
 - cmake 2.8+(可选, 如果不编译测试用例就不用)  
 - lua 5.2+  
 - 一个支持C++14的编译器(最好不要是clang, 因为用它过不了测试用例, 推荐gcc)  
 
 ---
 
-##特性与用法  
-###创建lua context  
+## 特性与用法  
+### 创建lua context  
 ```c++
 nua::Context ctx;
 ```
@@ -25,17 +25,17 @@ nua::Context ctx{false};
 ```  
 当nua::Context析构时, 所有其关联的资源都会被回收(包括通过值传入的C++对象)   
 
-###载入lua文件  
+### 载入lua文件  
 ```c++
 ctx.load("path/to/your.lua");
 ```
 
-###直接执行lua代码  
+###  直接执行lua代码  
 ```c++
 ctx(R"(print("hello, world"))");
 ```
 
-###向lua注册c++的函数  
+### 向lua注册c++的函数  
 ``` c++
 ctx["foo"] = []{ std::cout << "hello, nua" << std::endl; };     /**< lambda */
 ctx["bar"] = std::function<...>(...);                           /**< stl function */
@@ -52,7 +52,7 @@ ctx["func"] = callable;                                         /**< callable ob
 ```  
 之后你可以在lua中调用这些函数  
 
-###在C++中调用lua的函数  
+### 在C++中调用lua的函数  
 ```c++
 ctx["foo"]();                                                   /**< 没有返回值和参数 */
 ctx["bar"](1, 2, "hello").get<int>();                           /**< 获取int返回值 */
@@ -61,7 +61,7 @@ std::string y;
 std::tie(x, y) = ctx["barz"](1, 2, 3).get<int, std::string>();  /**< 接收多返回值 */
 ```
 
-###注册C++的类  
+### 注册C++的类  
 ```c++
 struct T
 {
@@ -84,7 +84,7 @@ T t;
 ctx["bar"](t);
 ```
 
-###传递引用
+### 传递引用
 通过setClass向nua注册过的类都可以传递引用  
 ```c++
 struct T
@@ -96,12 +96,12 @@ ctx["foo"](std::ref(t));
 ctx["bar"](std::cref(t));       /**< 当传递const ref时不会生成相应的set_xxx, 同时非const成员函数也会无效 */
 ```
 
-###向lua返回引用  
+### 向lua返回引用  
 ```c++
 ctx["foo"] = [&]() -> const T& { return t; };
 ```
 
-###C++接收lua函数  
+### C++接收lua函数  
 ```lua
 -- test.lua
 
@@ -125,7 +125,7 @@ ctx.load("test.lua");
 assert(ctx["pass_add"](3, 5) == 8);
 ```
 
-###lua中利用C++的多态  
+### lua中利用C++的多态  
 ```c++
 nua::Context ctx;
 
@@ -160,7 +160,7 @@ ctx["apply"](std::cref(rt));
 
 ---
 
-##注意  
+## 注意  
 - 基本类型的对象的*引用*不能传递给nua, 也不能在传递给nua的函数中作为返回值(仅const引用可以作为参数), 也不能从lua返回, 
 基本类型包括所有的数字类型, std::string, std::nullptr_t, nua::function   
 ```c++
